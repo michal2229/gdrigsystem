@@ -1,0 +1,19 @@
+diff --git a/tools/common_compiler_flags.py b/tools/common_compiler_flags.py
+index e645f39..8ce7515 100644
+--- a/tools/common_compiler_flags.py
++++ b/tools/common_compiler_flags.py
+@@ -26,11 +26,11 @@ def generate(env):
+     if env["lto"] != "none":
+         print("Using LTO: " + env["lto"])
+ 
+-    # Require C++17
++    # Require C++20
+     if env.get("is_msvc", False):
+-        env.Append(CXXFLAGS=["/std:c++17"])
++        env.Append(CXXFLAGS=["/std:c++20"])
+     else:
+-        env.Append(CXXFLAGS=["-std=c++17"])
++        env.Append(CXXFLAGS=["-std=c++20"])
+ 
+     # Disable exception handling. Godot doesn't use exceptions anywhere, and this
+     # saves around 20% of binary size and very significant build time.
