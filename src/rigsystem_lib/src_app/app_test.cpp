@@ -168,7 +168,7 @@ void create_tower(RigSystemCommon& rs, int num_levels)
         {
             const auto& p = conns_i[ci];
             Conn c = {
-                .id = i * conns_i.size() + ci,
+                .id = i * static_cast<int>( conns_i.size() ) + ci,
                 .i = p.first,
                 .j = p.second,
                 .len = -1.0f,

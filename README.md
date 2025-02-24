@@ -27,17 +27,16 @@ Build steps for usage with Godot:
 - run ./build_all.sh if on Linux, for other platforms please refer to [Godot GDExtension docs](https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/gdextension_cpp_example.html) (if you have ANDROID_HOME env var defined, it will also try to build for Android; check [docs about compiling for Android](https://docs.godotengine.org/en/stable/contributing/development/compiling/compiling_for_android.html) to set up the SDK)
 - you should have it built now, it is ready to be placed in your Godot project
 
-Build steps for standalone rigsystem_lib usage (TODO: set up a build system):
-- compile it manually as a shared or static lib, without touching gdrigsystem.cpp/hpp
-- link it with your app
-- have fun
+Build steps for standalone rigsystem_lib usage:
+- run ./build_librigsystem_so.sh  (you need meson and ninja)
+- sample app is included (app_test), will be built alongside the library
 
 
 ### todo
 - [ ] refine the GDRigSystem api - more flexibility in terms of rig definition (functions callable from GDScript for managing nodes and connections instead of enumerating other node's children, function to import definition from YAML file, etc.)
 - [ ] refine the rigsystem_lib api - cleaner use of resources, modular integrator for runtime switching, etc.
 - [ ] implement more integrators (implicit Euler, Runge–Kutta, etc.)
-- [ ] set up a buildsystem and make scripts for building rigsystem_lib standalone 
+- [x] set up a buildsystem and make scripts for building rigsystem_lib standalone 
 - [ ] make a C++ app for more robust testing and profiling the rigsystem_lib without Godot
 - [ ] beter interfacing with Godot physics system - more performance, better behavior, ability to deform a mesh, etc.
 - [ ] maybe some visual rig designer, maybe as a godot game/app, with option for exporting to a file
