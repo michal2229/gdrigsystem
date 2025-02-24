@@ -1,3 +1,9 @@
+*.import
+.sconsign.dblite
+*.os
+.godot
+*.swp
+
 # Prerequisites
 *.d
 
