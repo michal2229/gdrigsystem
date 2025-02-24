@@ -34,15 +34,15 @@ Build steps for standalone rigsystem_lib usage (TODO: set up a build system):
 
 
 ### todo
-[] refine the GDRigSystem api - more flexibility in terms of rig definition (functions callable from GDScript for managing nodes and connections instead of enumerating other node's children, function to import definition from YAML file, etc.)
-[] refine the rigsystem_lib api - cleaner use of resources, modular integrator for runtime switching, etc.
-[] implement more integrators (implicit Euler, Runge–Kutta, etc.)
-[] set up a buildsystem and make scripts for building rigsystem_lib standalone 
-[] make a C++ app for more robust testing and profiling the rigsystem_lib without Godot
-[] beter interfacing with Godot physics system - more performance, better behavior, ability to deform a mesh, etc.
-[] maybe some visual rig designer, maybe as a godot game/app, with option for exporting to a file
-[] other beam types and nodes, as in Rigs of Rods/BeamNG.drive, for modelling useful stuff
-[] ability to pin nodes to rigidbodies
-[] make it better
-[] rewrite in Rust (jk)
+[ ] refine the GDRigSystem api - more flexibility in terms of rig definition (functions callable from GDScript for managing nodes and connections instead of enumerating other node's children, function to import definition from YAML file, etc.)
+[ ] refine the rigsystem_lib api - cleaner use of resources, modular integrator for runtime switching, etc.
+[ ] implement more integrators (implicit Euler, Runge–Kutta, etc.)
+[ ] set up a buildsystem and make scripts for building rigsystem_lib standalone 
+[ ] make a C++ app for more robust testing and profiling the rigsystem_lib without Godot
+[ ] beter interfacing with Godot physics system - more performance, better behavior, ability to deform a mesh, etc.
+[ ] maybe some visual rig designer, maybe as a godot game/app, with option for exporting to a file
+[ ] other beam types and nodes, as in Rigs of Rods/BeamNG.drive, for modelling useful stuff
+[ ] ability to pin nodes to rigidbodies
+[ ] make it better
+[ ] rewrite in Rust (jk)
 
