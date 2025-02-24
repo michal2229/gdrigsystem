@@ -1,7 +1,10 @@
 project('rigsystem_lib', 'cpp',
   version : '0.1',
-  default_options : ['warning_level=3',
-                     'cpp_std=c++20'])
+  default_options : ['warning_level=3', 'cpp_std=c++20'] )
+
+#if get_option('buildtype') == 'fast'
+add_project_arguments('-Ofast', '-g3', language : 'cpp')
+#endif
 
 
 # building the lib

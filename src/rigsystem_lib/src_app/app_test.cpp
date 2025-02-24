@@ -1,7 +1,10 @@
 // our lib
+#include "deps/ascii-graphics/src/agm.hpp"
 #include <rigsystem_common.hpp>
 
 #include <iostream>
+#include <chrono>
+#include <cstdlib>
 
 // ascii-graphics lib
 #include <Screen.hpp>
@@ -17,14 +20,26 @@ namespace app_test
     
 struct RigWireMesh
 {
-    void update_wire(int id, const Vert& a, const Vert& b);
+    void update_wire(int id, const Vert& a, const Vert& b, bool broken);
     std::vector<std::pair<Vert, Vert>> wires;
+    std::vector<char> wbroken;
 };
 
-int gScreenWidth = 200; // Define the screens width and height
-int gScreenHeight = 50;
-float gAspect = (float)gScreenWidth / (float)gScreenHeight;
-float dt = 1.0f / 240.0f;
+const int gScreenWidth = 200; // Define the screens width and height
+const int gScreenHeight = 42;
+const float gAspect = (float)gScreenWidth / (float)gScreenHeight;    
+
+const Vert v_trans = {-3.8f,-1.25f,-10.0f};
+Mat4 t_rot_y = rotY(-50);
+Mat4 t_rot_z = rotZ(20);
+
+const float stiffness_factor = 10000.f;
+const float damping_factor = 100.f;
+const float break_threshold = 0.2;
+
+const int num_iter = 1000;
+inline constexpr float dt = 1.0f / 60.f / static_cast<float>(num_iter);
+const char perf_note[] = "[PERF] %d nodes, %d conns, %d iter time ms = %.3f";
 
 void create_tower(RigSystemCommon& rs, int num_levels);
 
@@ -38,6 +53,8 @@ void drawMeshWire(RigWireMesh m, char c, Screen& s);
 
 int main(int argc, char* argv[])
 {
+    srand (42);
+
     RigSystemCommon rs;
     app_test::create_tower(rs, 8);
 
@@ -46,64 +63,84 @@ int main(int argc, char* argv[])
 	Screen screen(app_test::gScreenWidth, app_test::gScreenHeight, camera, light);
 
     app_test::RigWireMesh wm;
-    
-    vec3 t = {-4.5f,1.0f,-10.0f};
 
 	while (1) { 
 		screen.start();
-
-        rs.integrate_system_radau2(app_test::dt);  // computing phys step
+        
+        auto t1 = std::chrono::high_resolution_clock::now();
+        for (int i = 0; i < app_test::num_iter; ++i)
+            rs.integrate_system_radau2(app_test::dt);  // computing phys step
+        auto t2 = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> ms = t2 - t1;
 
         for (int i = 0; i < rs.get_conns_num(); ++i)
         {
             vec3 pa = rs.m_s.nodes_pos[rs.m_s.conns_node_a[i]];
             vec3 pb = rs.m_s.nodes_pos[rs.m_s.conns_node_b[i]];
 
+            Vert va = { pa.x, pa.y, pa.z };
+            Vert vb = { pb.x, pb.y, pb.z };
+
+            va = mult4(va, app_test::t_rot_z);
+            vb = mult4(vb, app_test::t_rot_z);
+
+            va = mult4(va, app_test::t_rot_y);
+            vb = mult4(vb, app_test::t_rot_y);
+
+            va = va + app_test::v_trans;
+            vb = vb + app_test::v_trans;
+
             // updating wire mesh
-            wm.update_wire(i, Vert(pa.x + t.x, pa.y + t.y, pa.z + t.z), Vert(pb.x + t.x, pb.y + t.y, pb.z + t.z));
+            wm.update_wire(i, va, vb, rs.m_s.conns_broken[i]);
         }
 
         // drawing with ascii in the terminal
         // if not visible, decrease font size and maximize terminal window
         // should look like below
-		app_test::drawMeshWire(wm, 'x', screen);  
+		app_test::drawMeshWire(wm, 'o', screen);  
+
+        sprintf(&screen.buffer[app_test::gScreenHeight - 2][2], app_test::perf_note, rs.get_nodes_num(), rs.get_conns_num(), app_test::num_iter, ms.count());
 
 		screen.print(); // Print the entire screen
+		//std::cout << "[PERF] integrate_system_radau2 iter time ms = " << ms.count() << std::endl;
 		screen.clear(); // Clear the screen
 	}
 }
 
 
 /*  example view which should be visible in the terminal (a frame from animation)
-xxxxxxxxxxxxxx                                                                                                                                                                              
-x xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                                                                                                                                          
-x   xxx  xxxx        xxxxxxxxxxxxxxxxxxxxxxxxxx                                                                                                                                             
-x     xxxx  xxx     xxxxx xxxxxx xxx   xxxxxxxxxxxxxxxxxxxxx                                                                                                                                
-x       xxxxxxxxxxxx xxxxxxxx   xx xxx          xxxxxxxxxxxxxxxxxxxxxxxx                                                                                                                    
-x        xxx xxxxxxxxxxxxxx     xxxx xx     xxxxx xxxxxxxxx   xxxxxxxxxxxxxxxxxxx                                                                                                           
-x        x xxxxxxxxxxxx   x     x  xxxxxxxxxxxxxxxxx   x xxx             xxxxxxxxxxxxxx                                                                                                     
-x       xxxxxxxxxxxxxxx  x     x     xxxxxxxxxx    x  x    xxx       xxxxxxxxxx xx xxxxxxxxxx                                                                                               
-x    xxxxxx  xxxxxxxxxxxxx     x  xxxxxxxxxx      x   x     xxx  xxxxxxxxx  xx   xx       xxxxxxxxx                                                                                         
-x xxxxx  x xxx     xxx  xxx   xxxxxxxxxxxxxxxx   x   x       xxxxxxxxx     x x     x              xxxxxxxx                                                                                  
-xxxxxxxxxxxxxxxxxxxx xxxx xxxxx xxxx      xxxxx  x   x   xxxxxxxxx         xx       x         xxxxxxxxxx xxxxxxxxx                                                                          
-            xxxxxxxxxxxxxxxxxxxxxxxx       xxxxxx   xxxxxxxxxx   xx       xx         x   xxxxxx    xx  xxx      xxxxxxxxxx                                                                  
-                                xxxxxxxxxxxxxxxxx xxxxxxxxxx        xxx    xx         xxxxxx         x    xxx            xxxxxxxxxxx                                                          
-                                            xxxxxxxxxxxxxxx           xx  x x    xxxxxx   x         x       xx        xxxxxxxxxxxxxxxxxxxxxx                                                  
-                                                        xxxxxxxxxxxxxx  xxxxxxxxxxx         x       xx        xxx xxxxxxxx x   xx  x    xxxxxxxxxxxxx                                          
-                                                                    xxxxxxxxxxx              x     xx        xxxxxxx       x  x xxx xx          xxxxxxxxxxxx                                   
-                                                                            xxxxxxxx        xx   x     xxxxxx xxx       x  x    xxx x     xxxxxxxxxxxxxxxxxxxxxx                             
-                                                                                    xxxxxxxx  x x xxxxxx       xxxx    x   x     xxx xxxxxxxxxxx   xxx  xxxxxxxxxxxxxx                       
-                                                                                            xxxxxxx             xx x  x   x      xxxxxxxxx    x     xxx  xx    xxxxxxxxxxxxx                 
-                                                                                                    xxxxxxxx       x x x  x  xxxxxxxxxx x     x     x x x x x        xxx    xxxx              
-                                                                                                            xxxxxxxxxx xxxxxxxxxxx    x xxx    x     x  x xxx x xxxxxxxxxxxxxx                 
-                                                                                                                xxxxxxxxx           xxxxx  x     x    xxxxxxxxxxxxxxxx                      
-                                                                                                                        xxxxxxxx       x xxx     xxxxxxxxxxxxxxxx                            
-                                                                                                                                xxxxxxxx  x xxxxxxxxxxxxxxxxxxxxx x                            
-                                                                                                                                    xxxxxxxxx x xxxxxx    xx  x x                           
-                                                                                                                                            xxxxxxxxx        xx  xxx                          
-                                                                                                                                                    xxxxxxxxx  x    xx                         
-                                                                                                                                                            xxxxxxxx xx                        
-                                                                                                                                                                    xxxx
+                                                                                                                                 ooooo                                                                  
+                                                                                                                       oooooooooo  ooo                           oooooooooooooo                         
+                                                                                                             oooooooooo           o  o oooooooooooooooooooooooooooooooooo oooo                          
+                                                                                                   oooooooooooooooooooooooooooooooooooo              oooooooooo        ooooo                            
+                                                                                          ....oooooooooooooo......             oo    oo    oooooooooo               ooo  o                              
+                                                                                 .........   oooooooo             ...................oooooo                      ooo   oo                               
+                                                                        .........   oooooooooooooooooooooooooooooooooooooooooo   oooooooo                     ooo     o                                 
+                                                                ooooooooooooooooooooooooooooooooooooooooooooooo            oo ooo o  oo  ooo               ooo      oo                                  
+                                                         ooooooo  oooooooo  oooooooooooooooooooooooooooooo   ooooo        oooo   o    o     oo          ooo       oo                                    
+                                                   ooooooooooooooooooooooooooo.      oooooooo  o oo  oooo oo      oooo  ooo    oo     oo      oo     ooo         o                                      
+                                            ooooooooooooooooooooooooooooooooooooooooo  oo     ooo o o o .oo oo       ooooo    o       oo        ooooo          oo                                       
+                                    oooooooo oo.ooooooooooooooooooooooooooooooooooooooo    ooo o   o  o .  oo oo  ooo o   oooo        oo       ooo oo         o                                         
+                               oooooooooooooooo.ooooooooooooooooooooo   o ooo  oo o ooooooo    o  oo  o .    ooooo   o     oo ooooo   oo    ooo      ooo    oo                                          
+                           ooooooo.ooooooooooooo.ooooooooooooooooo  o  ooo  oooo  o oooo  oooo  oo  oo  .   ooooo ooo     o        ooooo ooo            oooo                                            
+                       oooo oooooooooooooooooooo.ooooo   ooo oooooooooo   o  ooo  ooo   oo    oooo   o   ooo     oo oo   o           oooooo              ooo                                            
+                   oooooooooooooooooo.oooooooooo.ooo oooo   oo  o ooooo    oo o ooo       oo   oo ooooooo.       o o  ooo         ooo  oo  oooo        oo   ooo                                         
+                ooo ooooooooooooooo  o. oooooo o.ooooo oo  oo  ooo  o oooooooooo ooo        ooo o  oooooooo    oo   ooo oo     ooo     oo      ooooo  o        oo                                       
+             ooooooooooooooooooooooooooo.ooo ooo.oooooooooooooo  o   o  ooooooooo  oo       o o ooo o o  . oooo     oooo  ooooo         o           oooo         ooo                                    
+          oooooooooooooooooooooooooooooooo  o ooo.o    oooooo    o   o oooo o  ooooo o     o ooooo  o  o  .  o ooooo    oooooo          o         oo    oooo        oo                                  
+       ooo.oo.ooooooooooooooooooooo  ooooo.oooo  . o  ooo.oooooooo   oo  o oo o o   oooo  ooo    oo o   o .oo     ooooooo oo  oo        o        o          oooo      ooo                               
+    ooooooooooooooooooooo  ooooo oooooo oooooo   . ooo o.o oooo  ooooo  o o  oo  o  o  ooooo     o oo   o o     oo ooo oooo oo  oo      o      oo               ooooo    oo                             
+  ooooooo.  o  o.o    o  oooooooooo o oooo oo.ooo.oo  o. o  ooooooo  ooooo oo  oo o ooo o o oooooo o oo  o.    oooo        ooooo  oo    oo    o                      oooo  oo                           
+  ooo ooooooo   oo..  o ooo  oooooo ooooo   oooo . oooooo   ooooo o  oo  oooooo  oooo  o   oo    oooo  oo o. ooo               oooo oo   o  oo                           ooooooo                        
+  o  o  .   ooooooo ..oo o ooo o ooooooo   ooooo..  oo ooooo   oooo  oo oo    ooooooooo      o   o o ooooooooo                    oooooo ooo                                 ooooo                      
+  o   oo     o  o  ooooooooo  ooo  ooo  oooooo ooo. o ooo   ooooooooo oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo                    
+  o    .o    o  ooo o  oooooooooooooooooo o   oooo.oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo                                         
+   o  .  oo  oooo oooooooooo  ooooooo.............oo..................ooooooooooooooooooooooooooooooooooooooooooooooooo                 ooo                                                             
+   o .     ooo o ooo ooooooooooooooooooooooooooo                                                                      ooooooooooooooooooooo                                                             
+   o .    ooooooooooooooooooooooooooo  oo                                                                                                                                                               
+   o.  ooo  ooooooooooooooo     ..oo oo                                                                                                                                                                 
+   o.ooooooooooooo  oooooooooooooo.oo                                                                                                                                                                   
+   ooooooooooooooooo
 */
 
 namespace app_test 
@@ -172,9 +209,9 @@ void create_tower(RigSystemCommon& rs, int num_levels)
                 .i = p.first,
                 .j = p.second,
                 .len = -1.0f,
-                .stiff = 6400.f,
-                .damp = 32.f,
-                .brk_thr = 0.8f,
+                .stiff = stiffness_factor,
+                .damp = damping_factor,
+                .brk_thr = break_threshold,
                 .broken = false
             };
 
@@ -185,19 +222,29 @@ void create_tower(RigSystemCommon& rs, int num_levels)
 
     for (int i = 0; i < rs.get_conns_num(); ++i)
     {
-        vec3 pa = rs.m_s.nodes_pos[rs.m_s.conns_node_a[i]];
-        vec3 pb = rs.m_s.nodes_pos[rs.m_s.conns_node_b[i]];  
-        auto dist = pa.distance_to(pb);
+        const vec3& pa = rs.m_s.nodes_pos[rs.m_s.conns_node_a[i]];
+        const vec3& pb = rs.m_s.nodes_pos[rs.m_s.conns_node_b[i]];  
+        const auto dist = pa.distance_to(pb);
         rs.m_s.conns_len[i] = dist;
     }
 
+    for (int i = 0; i < rs.get_nodes_num(); ++i)
+    {
+        rigsystem::vec3& p = rs.m_s.nodes_pos[i];
+
+        p.x += (static_cast<float>(rand() % 10 + 1) / 10.0f - 0.5f) / 4.0f;
+        p.y += (static_cast<float>(rand() % 10 + 1) / 10.0f - 0.5f) / 4.0f;
+        p.z += (static_cast<float>(rand() % 10 + 1) / 10.0f - 0.5f) / 4.0f;
+    }
 }
 
 
-void RigWireMesh::update_wire(int id, const Vert& a, const Vert& b)
+void RigWireMesh::update_wire(int id, const Vert& a, const Vert& b, bool broken)
 {
     if (id + 1> wires.size()) wires.resize(id+1);
+    if (id + 1> wbroken.size()) wbroken.resize(id+1);
     wires[id] = { a, b };
+    wbroken[id] = broken;
 }
 
 
@@ -234,11 +281,15 @@ void drawWire(std::pair<Vert, Vert>& w, char c, Screen& s)
 void drawMeshWire(RigWireMesh m, char c, Screen& s) 
 {
     s.renderMode = 0;  // no z-buffer
-	for (auto &wire : m.wires) 
-    {
+	for (int i = 0; i < m.wires.size(); ++i) 
+    { 
+        //if (m.wbroken[i]) continue;
+
+        auto &wire = m.wires[i];
+
 		project(wire, s.camera.projMat);
 		centerFlipY(wire, s);
-		drawWire(wire, c, s);
+		drawWire(wire, m.wbroken[i] ? '.' : c, s);
 	}
 }
 

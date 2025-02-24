@@ -19,8 +19,8 @@ using namespace rigsystem;
 #define DEBUG_PRINT(...) (void)0  //UtilityFunctions::print(__VA_ARGS__) //
 
 
-rigsystem::vec3 godot::v(const Vector3& v) { return rigsystem::vec3(v.x, v.y, v.z); }
-Vector3 godot::v(const rigsystem::vec3& v) { return Vector3(v.x, v.y, v.z); }
+vec3 godot::v(const Vector3& v) { return vec3(v.x, v.y, v.z); }
+Vector3 godot::v(const vec3& v) { return Vector3(v.x, v.y, v.z); }
 
 
 void GDRigSystem::_bind_methods()
@@ -153,6 +153,7 @@ void GDRigSystem::_physics_process(double delta)
         DEBUG_PRINT("[_physics_process] A2 // } ");
     }
 
+    //for (int i = 0; i < 10; ++i)
     m_rs.integrate_system_radau2(/*m_pos, m_vel, m_mas, m_pin, */delta /*m_con, m_pos, m_vel, m_frc*/);
 
     for (int i = 0; i < m_rs.get_nodes_num(); i++)

@@ -12,12 +12,14 @@ env = SConscript("godot-cpp/SConstruct")
 # - CPPDEFINES are for pre-processor defines
 # - LINKFLAGS are for linking flags
 
-env.Prepend(CXXFLAGS=[
-    "-std=c++20"
-])
+env.Append(CCFLAGS=[ "-std=c++20", "-Ofast", "-flto"])
+env.Append(LINKFLAGS=["-flto"])
+
+if env["platform"] not in ["android"]:
+    env.Append(CCFLAGS=[ "-mtune=native", "-mavx2" ])
 
 # tweak this if you want to use different folders, or more folders, to store your source code in.
-env.Append(CPPPATH=[
+env.Append(CCPATH=[
     "src/", 
     "src/rigsystem_lib/src/"
 ])
@@ -27,7 +29,6 @@ sources = [
     "src/gdrigsystem.cpp",
     "src/rigsystem_lib/src/rigsystem_common.cpp",
 ]
-
 # Add OpenMP flags based on platform.
 #if env["platform"] == "macos":
 #    env.Append(CXXFLAGS=["-Xpreprocessor", "-fopenmp"])
