@@ -17,7 +17,7 @@ It uses rigsystem_lib part for computation and serves as a glue between it and G
 Currently the GDRigSystem node expects two nodes on the same hierarchy level in the scene: RigNodes and RigConns. Children of these nodes (rig node, rig conn in the scenes dir) are the nodes and connections of the rig. I made a script rig_definition.gd, that can fill them on game start and create multi-level towers for testing.
 
 The rigsystem_lib part is where the physics is implemented. Currently only Radau IIA is implemented as an integrator. 
-It is designed to be used also outside of Godot extension, as it does not use any Godot stuff. 
+It is designed to be used also outside of Godot extension, as it does not use any Godot stuff - there is a sample app (app_test) that uses rigsystem_lib as a dynamic dependency. 
 
 
 ### build
