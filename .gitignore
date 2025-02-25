@@ -3,6 +3,8 @@
 *.os
 .godot
 *.swp
+.cache
+settings.json
 
 # Prerequisites
 *.d
