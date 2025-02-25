@@ -104,8 +104,6 @@ int main()
     return 0;
 }
 
-
-
 namespace app_test {
 
 // create tower rig
