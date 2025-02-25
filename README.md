@@ -29,7 +29,11 @@ Build steps for usage with Godot:
 
 Build steps for standalone rigsystem_lib usage:
 - run ./build_librigsystem_so.sh  (you need meson and ninja)
-- sample app is included (app_test), will be built alongside the library
+- sample app is included (app_test - renders pinned tower structure in ASCII and shows basic perf info, see gif below), will be built alongside the library
+
+<div align="center">
+<img src="https://raw.githubusercontent.com/michal2229/gdrigsystem/refs/heads/main/res/test_app_tower_00.gif" width="574" />
+</div>
 
 
 ### todo
@@ -37,8 +41,8 @@ Build steps for standalone rigsystem_lib usage:
 - [ ] refine the rigsystem_lib api - cleaner use of resources, modular integrator for runtime switching, etc.
 - [ ] implement more integrators (implicit Euler, Runge–Kutta, etc.)
 - [x] set up a buildsystem and make scripts for building rigsystem_lib standalone 
-- [ ] make a C++ app for more robust testing and profiling the rigsystem_lib without Godot
-- [ ] beter interfacing with Godot physics system - more performance, better behavior, ability to deform a mesh, etc.
+- [x] make a C++ app for more robust testing and profiling the rigsystem_lib without Godot
+- [ ] better interfacing with Godot physics system - more performance, better behavior, ability to deform a mesh, etc.
 - [ ] maybe some visual rig designer, maybe as a godot game/app, with option for exporting to a file
 - [ ] other beam types and nodes, as in Rigs of Rods/BeamNG.drive, for modelling useful stuff
 - [ ] ability to pin nodes to rigidbodies
