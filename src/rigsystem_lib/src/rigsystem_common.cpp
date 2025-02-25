@@ -1,5 +1,6 @@
 #include "rigsystem_common.hpp"
 
+//#include <iostream>
 //#include <godot_cpp/variant/utility_functions.hpp>
 #define DEBUG_PRINT(...) (void)0  //UtilityFunctions::print(__VA_ARGS__) // 
 
@@ -120,19 +121,23 @@ void RigSystemCommon::compute_system_forces( std::span<const vec3> pos_in, std::
 
         const int ni = m_s.conns_node_a[ci];
         const int nj = m_s.conns_node_b[ci];
+        const float lenn = m_s.conns_len[ci];
+        const float stiff = m_s.conns_stiff[ci];
+        const float damp = m_s.conns_damp[ci];
 
         const vec3 delta = pos_in[nj] - pos_in[ni];
-        const float dist = delta.length();
-        const vec3 dir = delta / dist;
-        const float extension = dist - m_s.conns_len[ci];
-
         const vec3 relative_vel = vel_in[nj] - vel_in[ni];
-        const float fspring = m_s.conns_stiff[ci] * extension;
-        const float fdamp = m_s.conns_damp[ci] * (relative_vel.dot(dir));
+
+        const float dist = delta.length();
+        const float extension = dist - lenn;
+        const vec3 dir = delta / dist;
+        
+        const float fspring = stiff * extension;
+        const float fdamp = damp * (relative_vel.dot(dir));
         const vec3 force = (fspring + fdamp) * dir;
 
         forces[ni] += force;
-        forces[nj] -= force; 
+        forces[nj] -= force;
     }
 
     for (int i = 0; i < num_nodes; ++i) 
@@ -211,7 +216,6 @@ void RigSystemCommon::integrate_system_radau2( float dt )
         new_K1_acc = accel1;
         new_K2_vel = vel2;
         new_K2_acc = accel2;
-
         float diff = 0;
         for (int i=0; i<num_nodes; ++i)
         {
@@ -235,7 +239,6 @@ void RigSystemCommon::integrate_system_radau2( float dt )
         K2_vel = new_K2_vel;
         K2_acc = new_K2_acc;
     }
-
     for (int i=0; i<num_nodes; ++i)
     {
         vec3& npos = m_s.nodes_pos[i];

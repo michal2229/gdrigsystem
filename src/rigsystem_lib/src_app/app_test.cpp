@@ -97,9 +97,10 @@ int main(int argc, char* argv[])
         // drawing with ascii in the terminal
         // if not visible, decrease font size and maximize terminal window
         // should look like below
-		app_test::drawMeshWire(wm, 'o', screen);  
+		app_test::drawMeshWire(wm, '#', screen);  
 
-        sprintf(&screen.buffer[app_test::gScreenHeight - 2][2], app_test::perf_note, rs.get_nodes_num(), rs.get_conns_num(), app_test::num_iter, ms.count());
+        if ( std::size(app_test::perf_note) < app_test::gScreenWidth - 2  )
+            sprintf(&screen.buffer[app_test::gScreenHeight - 2][1], app_test::perf_note, rs.get_nodes_num(), rs.get_conns_num(), app_test::num_iter, ms.count());
 
 		screen.print(); // Print the entire screen
 		//std::cout << "[PERF] integrate_system_radau2 iter time ms = " << ms.count() << std::endl;
