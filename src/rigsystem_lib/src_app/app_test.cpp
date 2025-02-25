@@ -1,6 +1,5 @@
-// our lib
-#include "deps/ascii-graphics/src/agm.hpp"
 #include <rigsystem_common.hpp>
+#include <ascii_draw_rigsystem.hpp>
 
 #include <iostream>
 #include <chrono>
@@ -14,111 +13,93 @@
 #include <Mesh.hpp>
 
 using namespace rigsystem;
+using namespace adr;
 
 namespace app_test 
 {
     
-struct RigWireMesh
-{
-    void update_wire(int id, const Vert& a, const Vert& b, bool broken);
-    std::vector<std::pair<Vert, Vert>> wires;
-    std::vector<char> wbroken;
-};
-
 // ascii screen
-const int gScreenWidth = 200;
-const int gScreenHeight = 42;
-const float gAspect = (float)gScreenWidth / (float)gScreenHeight;    
-
-// rotating the rig structure
-const Vert v_trans = {-3.8f,-1.25f,-10.0f};
-Mat4 t_rot_y = rotY(-50);
-Mat4 t_rot_z = rotZ(20);
+const size_t screen_width = 200;
+const size_t screen_height = 42;
 
 // rig connections params
-const float stiffness_factor = 10000.f;
+const float stiffness_factor = 70000.f;
 const float damping_factor = 100.f;
-const float break_threshold = 0.2;
+const float break_threshold = 0.2f;
 
 // sim params
-const int num_iter = 1000;
+const size_t num_iter = 100;
 inline constexpr float dt = 1.0f / 60.f / static_cast<float>(num_iter);
 
 // perf note added to ascii buffer
-const char perf_note[] = "[PERF] %d nodes, %d conns, %d iter time ms = %.3f";
+const char perf_note[] = "[PERF] %lu nodes, %lu conns, %lu iter time ms = %.3f";
 
 // rig tower creation function
-void create_tower(RigSystemCommon& rs, int num_levels);
-
-// ascii screen drawing functions - modified vs library to draw lines instread of triangles
-void project(std::pair<Vert, Vert>& w, Mat4 m);
-void centerFlipY(std::pair<Vert, Vert>& w, Screen& s);
-void drawWire(std::pair<Vert, Vert>& w, char c, Screen& s);
-void drawMeshWire(RigWireMesh m, char c, Screen& s);
+void create_tower(RigSystemCommon& rs, size_t num_levels, bool horizontal);
 
 }
 
 
-int main(int argc, char* argv[])
+using namespace app_test;
+
+int main()
 {
     srand (42);
 
+    // our ascii renderer
+    RigRendererAscii rrend(app_test::screen_width, app_test::screen_height, 30);
+
     // creating the rig tower to simulate
     RigSystemCommon rs;
-    app_test::create_tower(rs, 8);
-
-    // ascii drawing setup
-    Camera camera(0.0f, 0.0f, 0.0f, app_test::gAspect, 12, 0.1, 1000);
-	LightD light;
-	Screen screen(app_test::gScreenWidth, app_test::gScreenHeight, camera, light);
+    RigSystemCommon rs2;
+    create_tower(rs, 8, true);
+    create_tower(rs2, 24, false);
 
     // mesh to update according to current structure state and render as ascii
-    app_test::RigWireMesh wm;
+    const size_t mesh_id2 = rrend.add_mesh(RigWireMesh());
+    const size_t mesh_id = rrend.add_mesh(RigWireMesh());
+    
+    rrend.get_mesh(mesh_id);
+    rrend.get_mesh(mesh_id2);
 
-	while (1) { 
-		screen.start();
-        
+    rrend.add_transform(mesh_id, rotZ(15.0f));
+    rrend.add_transform(mesh_id, adr::translateXYZ(-4.5f, -1.5f, 0.0f));
+    size_t tansform_id = rrend.add_transform(mesh_id, rotY(0.0f));
+    rrend.add_transform(mesh_id, adr::translateXYZ(0.0f, 0.0f, -4.5f));
+
+    rrend.add_transform(mesh_id2, adr::translateXYZ(-20.0f, -10.0f, -20.0f));
+
+    float roty = -60.0f;
+	while (1) {         
         auto t1 = std::chrono::high_resolution_clock::now();  // perf
 
-        for (int i = 0; i < app_test::num_iter; ++i)
-            rs.integrate_system_radau2(app_test::dt);  // computing phys step
+        for (size_t i = 0; i < num_iter; ++i)
+        {
+            rs.integrate_system_radau2(dt);  // computing phys step
+            rs2.integrate_system_radau2(dt);  // computing phys step
+        }
 
         auto t2 = std::chrono::high_resolution_clock::now();  // perf
         std::chrono::duration<double, std::milli> ms = t2 - t1;
+        
+        rrend.get_transform(mesh_id, tansform_id) = rotY(roty); roty -= ms.count() / 50.0f;
+        if (roty < -360.0f) roty += 720.0f;
 
-        // update mesh according to current structure state
-        for (int i = 0; i < rs.get_conns_num(); ++i)
-        {
-            vec3 pa = rs.m_s.nodes_pos[rs.m_s.conns_node_a[i]];
-            vec3 pb = rs.m_s.nodes_pos[rs.m_s.conns_node_b[i]];
-
-            Vert va = { pa.x, pa.y, pa.z };
-            Vert vb = { pb.x, pb.y, pb.z };
-
-            va = mult4(va, app_test::t_rot_z);
-            vb = mult4(vb, app_test::t_rot_z);
-
-            va = mult4(va, app_test::t_rot_y);
-            vb = mult4(vb, app_test::t_rot_y);
-
-            va = va + app_test::v_trans;
-            vb = vb + app_test::v_trans;
-
-            // updating wire mesh
-            wm.update_wire(i, va, vb, rs.m_s.conns_broken[i]);
-        }
-
+        rrend.update(mesh_id, rs);
+        rrend.update(mesh_id2, rs2);
+        
         // drawing with ascii in the terminal
         // if not visible, decrease font size and maximize terminal window
-        // should look like below
-		app_test::drawMeshWire(wm, '#', screen);  
+        // should look like below 
+        rrend.render();
 
         // perf note (added test if buffer is too small to avoid segfaults)
-        if ( std::size(app_test::perf_note) < app_test::gScreenWidth - 2  )
-            sprintf(&screen.buffer[app_test::gScreenHeight - 2][1], app_test::perf_note, rs.get_nodes_num(), rs.get_conns_num(), app_test::num_iter, ms.count());
-
-		screen.print(); // Print the entire screen
-		screen.clear(); // Clear the screen
+        if ( std::size(perf_note) < app_test::screen_width - 2  )
+            sprintf(&(rrend.p_screen->buffer[app_test::screen_height - 2][1]), 
+                perf_note, 
+                rs.get_nodes_num() + rs2.get_nodes_num(), 
+                rs.get_conns_num() + rs2.get_conns_num(), 
+                num_iter, ms.count());
 	}
 
     return 0;
@@ -164,23 +145,23 @@ namespace app_test
 {
 
 // create tower rig
-void create_tower(RigSystemCommon& rs, int num_levels)
+void create_tower(RigSystemCommon& rs, size_t num_levels, bool horizontal)
 {
-    std::vector<std::pair<int, int> > conns = { {1, 0}, {2,0}, {3,1} };
+    //std::vector<std::pair<size_t, size_t> > conns = { {1, 0}, {2,0}, {3,1} };
 
-    for (int i = 0; i < num_levels; ++i)
+    for (size_t i = 0; i < num_levels; ++i)
     {
-        for (int j = 0; j < 2; ++j)
+        for (size_t j = 0; j < 2; ++j)
         {
-            for (int k = 0; k < 2; ++k) 
+            for (size_t k = 0; k < 2; ++k) 
             {
                 Node n = {
                     .id = i*4 + j*2 + k,
                     .mass = 1,
-                    .pos = vec3( 1.0f + i, j-0.5f ,  (j^k)-0.5f ),
-                    .vel = vec3(0,0,0),
-                    .acc = vec3(0,0,0), 
-                    .frc = vec3(0,0,0), 
+                    .pos = horizontal ? vec3( 1.0f + i, j-0.5f ,  (j^k)-0.5f ) : vec3( j-0.5f, 1.0f + i ,  (j^k)-0.5f ),
+                    .vel = vec3(0.0f,0.0f,0.0f),
+                    .acc = vec3(0.0f,0.0f,0.0f), 
+                    .frc = vec3(0.0f,0.0f,0.0f), 
                     .pinned = i == 0 
                 };
                 rs.add_node(n);
@@ -193,7 +174,7 @@ void create_tower(RigSystemCommon& rs, int num_levels)
             continue;
         }
 
-        std::vector<std::pair<int, int> > conns_i = {
+        std::vector<std::pair<size_t, size_t> > conns_i = {
             {0 +i*4, 1 +i*4},
             {0 +i*4, 3 +i*4},
             {0 +i*4, 4 +i*4},
@@ -218,11 +199,11 @@ void create_tower(RigSystemCommon& rs, int num_levels)
             {3 +i*4, 6 +i*4},
             {3 +i*4, 7 +i*4} };
 
-        for (int ci = 0; ci < conns_i.size(); ++ci)
+        for (size_t ci = 0; ci < conns_i.size(); ++ci)
         {
             const auto& p = conns_i[ci];
             Conn c = {
-                .id = i * static_cast<int>( conns_i.size() ) + ci,
+                .id = i * conns_i.size()  + ci,
                 .i = p.first,
                 .j = p.second,
                 .len = -1.0f,
@@ -237,7 +218,7 @@ void create_tower(RigSystemCommon& rs, int num_levels)
         }
     }
 
-    for (int i = 0; i < rs.get_conns_num(); ++i)
+    for (size_t i = 0; i < rs.get_conns_num(); ++i)
     {
         const vec3& pa = rs.m_s.nodes_pos[rs.m_s.conns_node_a[i]];
         const vec3& pb = rs.m_s.nodes_pos[rs.m_s.conns_node_b[i]];  
@@ -245,7 +226,7 @@ void create_tower(RigSystemCommon& rs, int num_levels)
         rs.m_s.conns_len[i] = dist;
     }
 
-    for (int i = 0; i < rs.get_nodes_num(); ++i)
+    for (size_t  i = 0; i < rs.get_nodes_num(); ++i)
     {
         rigsystem::vec3& p = rs.m_s.nodes_pos[i];
 
@@ -255,62 +236,5 @@ void create_tower(RigSystemCommon& rs, int num_levels)
     }
 }
 
-
-void RigWireMesh::update_wire(int id, const Vert& a, const Vert& b, bool broken)
-{
-    // resize the vectors if necessary - will reallocate a bit initially but impact should be minor
-    if (id + 1> wires.size()) wires.resize(id+1);
-    if (id + 1> wbroken.size()) wbroken.resize(id+1);
-    wires[id] = { a, b };
-    wbroken[id] = broken;
-}
-
-
-/// functions below were adapted from ascii-graphics lib to draw lines instead of triangles
-
-void project(std::pair<Vert, Vert>& w, Mat4 m) 
-{
-	w.first  = mult4(w.first, m);
-	w.second = mult4(w.second, m);
-}
-
-void centerFlipY(std::pair<Vert, Vert>& w, Screen& s)
-{
-	// Flip triangle verts
-	w.first.y *= -1.f;
-	w.second.y *= -1.f;
-
-	// Scale by aspect ratio
-	w.first.x *= s.camera.a*2.5;
-	w.second.x *= s.camera.a*2.5;
-
-	// Move the very center of screen
-	w.first.x += (float)s.width/2;
-	w.first.y += (float)s.height/2.f;
-	w.second.x += (float)s.width/2;
-	w.second.y += (float)s.height/2.f;
-}
-
-void drawWire(std::pair<Vert, Vert>& w, char c, Screen& s)
-{
-    s.drawLine(w.first, w.second, c);
-}
-
-void drawMeshWire(RigWireMesh m, char c, Screen& s) 
-{
-    s.renderMode = 0;  // no z-buffer
-	for (int i = 0; i < m.wires.size(); ++i) 
-    { 
-        //if (m.wbroken[i]) continue;
-
-        auto &wire = m.wires[i];
-
-		project(wire, s.camera.projMat);
-		centerFlipY(wire, s);
-
-        // draw the wire (correct drawn with content of c, broken with '.')
-		drawWire(wire, m.wbroken[i] ? '.' : c, s);
-	}
-}
 
 }

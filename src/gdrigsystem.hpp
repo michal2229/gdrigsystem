@@ -12,7 +12,7 @@ namespace godot {
 
 class MeshInstance3D;
 class Node3D;
-class Vector3;
+struct Vector3;
 
 inline rigsystem::vec3 v(const Vector3& v);
 inline Vector3 v(const rigsystem::vec3& v);

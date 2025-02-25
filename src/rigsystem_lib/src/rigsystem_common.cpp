@@ -1,4 +1,5 @@
 #include "rigsystem_common.hpp"
+//#include <omp.h>
 
 //#include <iostream>
 //#include <godot_cpp/variant/utility_functions.hpp>
@@ -55,7 +56,7 @@ void zero(std::vector<vec3>& v)
 void copy( std::span<const vec3> vi, std::vector<vec3>& vo)
 {   
     vo.resize(vi.size());
-    for (int i = 0; i < vi.size(); ++i) vo[i] = vi[i];
+    for (size_t i = 0; i < vi.size(); ++i) vo[i] = vi[i];
 }
 
 
@@ -91,12 +92,12 @@ void RigSystemCommon::add_conn(Conn c)
     DEBUG_PRINT("[RigSystemCommon::add_conn] c.broken = " + String::num(c.broken));
 }
 
-size_t RigSystemCommon::get_nodes_num()
+size_t RigSystemCommon::get_nodes_num() const
 {
     return m_s.get_nodes_num();
 }
 
-size_t RigSystemCommon::get_conns_num()
+size_t RigSystemCommon::get_conns_num() const
 {
     return m_s.get_conns_num();
 }
@@ -105,19 +106,19 @@ size_t RigSystemCommon::get_conns_num()
 void RigSystemCommon::compute_system_forces( std::span<const vec3> pos_in, std::span<const vec3> vel_in )
 {
     const auto num_nodes = get_nodes_num();
-    const auto num_conns = get_conns_num();
+    // const auto num_conns = get_conns_num();
     
     m_s.forces.resize(num_nodes);
     copy(m_s.nodes_frc, m_s.forces);
 
-    for(int ci = 0; ci < m_s.get_conns_num(); ci++)
+    for(size_t ci = 0; ci < m_s.get_conns_num(); ci++)
     {
         //      the hottest loop
 
         if(m_s.conns_broken[ci]) continue;
 
-        const int ni = m_s.conns_node_a[ci];
-        const int nj = m_s.conns_node_b[ci];
+        const size_t ni = m_s.conns_node_a[ci];
+        const size_t nj = m_s.conns_node_b[ci];
         const float lenn = m_s.conns_len[ci];
         const float stiff = m_s.conns_stiff[ci];
         const float damp = m_s.conns_damp[ci];
@@ -137,7 +138,7 @@ void RigSystemCommon::compute_system_forces( std::span<const vec3> pos_in, std::
         m_s.forces[nj] -= force;
     }
 
-    for (int i = 0; i < num_nodes; ++i) 
+    for (size_t i = 0; i < num_nodes; ++i) 
     {
         m_s.forces[i] += m_s.nodes_mass[i] * c::world::gravity;
     }
@@ -149,12 +150,12 @@ void RigSystemCommon::system_derivative(std::span<const vec3> pos_in,
                                         std::vector<vec3>& acc_out )
 {
     const auto num_nodes = get_nodes_num();
-    const auto num_conns = get_conns_num();
+    //const auto num_conns = get_conns_num();
 
     compute_system_forces(pos_in, vel_in);
 
     acc_out.resize(num_nodes);
-    for (int i = 0; i < num_nodes; ++i) 
+    for (size_t i = 0; i < num_nodes; ++i) 
     {
         acc_out[i] = m_s.forces[i] / m_s.nodes_mass[i];
 
@@ -168,8 +169,8 @@ void RigSystemCommon::system_derivative(std::span<const vec3> pos_in,
 // ~15% time spent here according to callgrind and perf - not critical for now
 void RigSystemCommon::integrate_system_radau2( float dt )
 {
-    const auto num_nodes  = get_nodes_num();
-    const auto num_conns = get_conns_num();
+    const size_t num_nodes  = get_nodes_num();
+    //const auto num_conns = get_conns_num();
     
     system_derivative(m_s.nodes_pos, m_s.nodes_vel, m_s.accel);
 
@@ -178,7 +179,7 @@ void RigSystemCommon::integrate_system_radau2( float dt )
     m_s.K1_acc.resize(num_nodes);
     m_s.K2_acc.resize(num_nodes);
 
-    for (int i = 0; i < num_nodes; ++i)
+    for (size_t i = 0; i < num_nodes; ++i)
     {
         m_s.K1_vel[i] = m_s.nodes_vel[i];
         m_s.K2_vel[i] = m_s.nodes_vel[i];
@@ -195,7 +196,7 @@ void RigSystemCommon::integrate_system_radau2( float dt )
 
     for (int i=0; i<c::system::max_iter_num; ++i) 
     {
-        for (int j=0; j<num_nodes; ++j) 
+        for (size_t j=0; j<num_nodes; ++j) 
         {
             const auto& npos = m_s.nodes_pos[j];
             const auto& nvel = m_s.nodes_vel[j];
@@ -214,12 +215,12 @@ void RigSystemCommon::integrate_system_radau2( float dt )
         m_s.new_K2_vel = m_s.vel2;
         m_s.new_K2_acc = m_s.accel2;
         float diff = 0;
-        for (int i=0; i<num_nodes; ++i)
+        for (size_t j=0; j<num_nodes; ++j)
         {
-            diff += m_s.new_K1_vel[i].distance_to(m_s.K1_vel[i]);
-            diff += m_s.new_K1_acc[i].distance_to(m_s.K1_acc[i]);
-            diff += m_s.new_K2_vel[i].distance_to(m_s.K2_vel[i]);
-            diff += m_s.new_K2_acc[i].distance_to(m_s.K2_acc[i]);
+            diff += m_s.new_K1_vel[j].distance_to(m_s.K1_vel[j]);
+            diff += m_s.new_K1_acc[j].distance_to(m_s.K1_acc[j]);
+            diff += m_s.new_K2_vel[j].distance_to(m_s.K2_vel[j]);
+            diff += m_s.new_K2_acc[j].distance_to(m_s.K2_acc[j]);
         }
 
         if (diff < c::system::max_error)
@@ -236,7 +237,8 @@ void RigSystemCommon::integrate_system_radau2( float dt )
         m_s.K2_vel = m_s.new_K2_vel;
         m_s.K2_acc = m_s.new_K2_acc;
     }
-    for (int i=0; i<num_nodes; ++i)
+
+    for (size_t i=0; i<num_nodes; ++i)
     {
         vec3& npos = m_s.nodes_pos[i];
         vec3& nvel = m_s.nodes_vel[i];
@@ -248,16 +250,16 @@ void RigSystemCommon::integrate_system_radau2( float dt )
         } 
         else 
         {
-            npos = (npos);
-            nvel = (vec3(0, 0, 0));
+            //npos = (npos);
+            nvel = (vec3(0.0f, 0.0f, 0.0f));
         }
     }
 
-    for (int i = 0; i < m_s.get_conns_num(); ++i )
+    for (size_t i = 0; i < m_s.get_conns_num(); ++i )
     {  
         // check for broken conns
-        const int ni = m_s.conns_node_a[i];
-        const int nj = m_s.conns_node_b[i];
+        const size_t ni = m_s.conns_node_a[i];
+        const size_t nj = m_s.conns_node_b[i];
 
         const vec3 delta = m_s.nodes_pos[nj] - m_s.nodes_pos[ni];
         const float dist = delta.length();
@@ -267,7 +269,6 @@ void RigSystemCommon::integrate_system_radau2( float dt )
             continue; 
         }
 
-        const vec3 dir = delta / dist;
         const float extension = dist - m_s.conns_len[i];
         if (std::abs(extension) > m_s.conns_brk_thr[i]){
             m_s.conns_broken[i] = true; 

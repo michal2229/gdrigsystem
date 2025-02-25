@@ -12,7 +12,7 @@ env = SConscript("godot-cpp/SConstruct")
 # - CPPDEFINES are for pre-processor defines
 # - LINKFLAGS are for linking flags
 
-env.Append(CCFLAGS=[ "-std=c++20", "-Ofast", "-flto"])
+env.Append(CCFLAGS=[ "-std=c++20", "-O3", "-flto", "-Wextra", "-Wall", "-Wno-unused-parameter"])
 env.Append(LINKFLAGS=["-flto"])
 
 if env["platform"] not in ["android"]:

@@ -42,14 +42,13 @@ void GDRigSystem::initialize_nodes()
 {
     DEBUG_PRINT("[initialize_nodes] { ");
 
-    
     m_rs.m_s.clear();
 
     Node* rignodes_group = get_node_or_null(NodePath("../RigNodes"));
 
     TypedArray<Node> rignodes = rignodes_group->get_children();
 
-    for (int i = 0; i < rignodes.size(); i++)
+    for (size_t i = 0; i < static_cast<size_t>(rignodes.size()); i++)
     {
         DEBUG_PRINT("[initialize_nodes] i = " + String::num(i));
 
@@ -81,7 +80,7 @@ void GDRigSystem::initialize_connections()
     Node* rigconns_group = get_node_or_null(NodePath("../RigConns"));
     TypedArray<Node> rigconns = rigconns_group->get_children();
 
-    for (int i = 0; i < rigconns.size(); i++)
+    for (size_t i = 0; i < static_cast<size_t>(rigconns.size()); i++)
     {
         DEBUG_PRINT("[initialize_connections] i = " + String::num(i));
         Node* c = rigconns_group->get_child(i);
@@ -143,7 +142,7 @@ void GDRigSystem::_physics_process(double delta)
     if (m_rs.m_s.get_nodes_num() == 0) return;
     DEBUG_PRINT("[_physics_process] {");
 
-    for (int i = 0; i < m_rs.get_nodes_num(); i++)
+    for (size_t i = 0; i < m_rs.get_nodes_num(); i++)
     {
         DEBUG_PRINT("[_physics_process] A2 { ");
         Node* n = m_p_nodes[i];
@@ -156,7 +155,7 @@ void GDRigSystem::_physics_process(double delta)
     //for (int i = 0; i < 10; ++i)
     m_rs.integrate_system_radau2(/*m_pos, m_vel, m_mas, m_pin, */delta /*m_con, m_pos, m_vel, m_frc*/);
 
-    for (int i = 0; i < m_rs.get_nodes_num(); i++)
+    for (size_t i = 0; i < m_rs.get_nodes_num(); i++)
     {
         DEBUG_PRINT("[_physics_process] B { ");
 
@@ -176,7 +175,7 @@ void GDRigSystem::align_visuals()
 {
     DEBUG_PRINT("[align_visuals] { ");
 
-    for (int i = 0; i < m_p_nodes.size(); i++)
+    for (size_t i = 0; i < m_p_nodes.size(); i++)
     {
         Node* n = m_p_nodes[i];
         Node3D* n3d = Object::cast_to<Node3D>(n);
@@ -184,7 +183,7 @@ void GDRigSystem::align_visuals()
         n->set("velocity", v(m_rs.m_s.nodes_vel[i]));
     }
 
-    for (int i = 0; i < m_p_conns.size(); i++)
+    for (size_t i = 0; i < m_p_conns.size(); i++)
     {
         Node* c = m_p_conns[i];
         if (!c) continue;

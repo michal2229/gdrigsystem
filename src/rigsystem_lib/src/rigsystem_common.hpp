@@ -1,5 +1,4 @@
-#ifndef RIGSYSTEM_H
-#define RIGSYSTEM_H
+#pragma once
 
 #include "rigsystem_vec3.hpp"
 
@@ -10,29 +9,30 @@
 
 namespace rigsystem 
 {
-
 struct Node
 {
-	int id;   // node id
+	size_t id;   // node id
 	float mass; // node mass
 	vec3 pos;  // node position
 	vec3 vel;  // node velocity
 	vec3 acc;  // node acceleration
 	vec3 frc;  // forces acting on node
 	bool pinned; // node pinned flag
+	char _padding[3] = {}; 
 };
 
 
 struct Conn
 {
-	int id;  // connection id
-	int i;   // node a id
-	int j;   // node b id
+	size_t id;  // connection id
+	size_t i;   // node a id
+	size_t j;   // node b id
 	float len;  // connection rest length
 	float stiff;   // connection stiffness param
 	float damp;    // connection damping param
 	float brk_thr; // connection break threshold
 	bool broken;   // connection broken flag
+	char _padding[7] = {}; 
 };
 
 
@@ -88,12 +88,12 @@ struct RigStructureState
 	}
 		
 
-	size_t get_nodes_num()
+	size_t get_nodes_num() const
 	{
 		return nodes_pos.size();
 	}
 
-	size_t get_conns_num()
+	size_t get_conns_num() const
 	{
 		return conns_len.size();
 	}
@@ -106,8 +106,8 @@ struct RigStructureState
 	std::vector<vec3>  nodes_frc;
 	std::vector<char>  nodes_pinned;
 
-	std::vector<int>   conns_node_a;
-	std::vector<int>   conns_node_b;
+	std::vector<size_t> conns_node_a;
+	std::vector<size_t> conns_node_b;
 	std::vector<float> conns_len;
 	std::vector<float> conns_stiff;
 	std::vector<float> conns_damp;
@@ -139,12 +139,13 @@ struct RigStructureState
 };
 
 
+void zero(std::vector<vec3>& v);
+void copy( std::span<const vec3> vi, std::vector<vec3>& vo);
+
+
 class RigSystemCommon
 {
 public:
-	RigSystemCommon() = default;
-	virtual ~RigSystemCommon() = default;
-
 	void load_definition_from_file();
 
 	void clear();
@@ -152,8 +153,8 @@ public:
 	void add_node(Node n);
 	void add_conn(Conn c);
 
-	size_t get_nodes_num();
-	size_t get_conns_num();
+	size_t get_nodes_num() const;
+	size_t get_conns_num() const;
 
 	void simulate(float dt);
 
@@ -167,11 +168,6 @@ public:
 	void integrate_system_radau2( float dt );
 
 	RigStructureState m_s;
-private:
-    int m_init_done = 0;
 };
 
 }
-
-#endif
-

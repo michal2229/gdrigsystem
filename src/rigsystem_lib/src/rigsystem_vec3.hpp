@@ -6,9 +6,8 @@ namespace rigsystem
 struct vec3 
 {
 	template <class T>
-	vec3(T x, T y, T z) : x(x), y(y), z(z) {}
+	vec3(T _x, T _y, T _z) : x(_x), y(_y), z(_z) {}
 	vec3() : x(0.f), y(0.f), z(0.f) {}
-	vec3(const vec3& o) : x(o.x), y(o.y), z(o.z) {}
 
 	void zero() { x = 0.f; y = 0.f; z = 0.f; }
 

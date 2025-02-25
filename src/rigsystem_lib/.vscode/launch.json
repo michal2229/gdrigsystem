@@ -5,6 +5,7 @@
     //
     "version": "0.2.0",
     "configurations": [
+
       {
         "name": "app_test - Build and debug",
         "request": "launch",
@@ -13,9 +14,17 @@
           "MIMode": "gdb",
           //"envFile": "${workspaceFolder}/builddir/meson-vscode.env",
         },
+        "setupCommands": [
+          { 
+            "description": "Enable pretty-printing for gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": true
+          }
+        ],
         "cwd": "${workspaceFolder}/builddir/",
         "program": "${workspaceFolder}/builddir/app_test",
         "args": [ ],
+        
         "environment": [
           {
             "name": "VARNAME",
