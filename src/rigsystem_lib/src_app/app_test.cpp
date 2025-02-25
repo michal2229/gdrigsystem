@@ -25,24 +25,32 @@ struct RigWireMesh
     std::vector<char> wbroken;
 };
 
-const int gScreenWidth = 200; // Define the screens width and height
+// ascii screen
+const int gScreenWidth = 200;
 const int gScreenHeight = 42;
 const float gAspect = (float)gScreenWidth / (float)gScreenHeight;    
 
+// rotating the rig structure
 const Vert v_trans = {-3.8f,-1.25f,-10.0f};
 Mat4 t_rot_y = rotY(-50);
 Mat4 t_rot_z = rotZ(20);
 
+// rig connections params
 const float stiffness_factor = 10000.f;
 const float damping_factor = 100.f;
 const float break_threshold = 0.2;
 
+// sim params
 const int num_iter = 1000;
 inline constexpr float dt = 1.0f / 60.f / static_cast<float>(num_iter);
+
+// perf note added to ascii buffer
 const char perf_note[] = "[PERF] %d nodes, %d conns, %d iter time ms = %.3f";
 
+// rig tower creation function
 void create_tower(RigSystemCommon& rs, int num_levels);
 
+// ascii screen drawing functions - modified vs library to draw lines instread of triangles
 void project(std::pair<Vert, Vert>& w, Mat4 m);
 void centerFlipY(std::pair<Vert, Vert>& w, Screen& s);
 void drawWire(std::pair<Vert, Vert>& w, char c, Screen& s);
@@ -55,24 +63,30 @@ int main(int argc, char* argv[])
 {
     srand (42);
 
+    // creating the rig tower to simulate
     RigSystemCommon rs;
     app_test::create_tower(rs, 8);
 
+    // ascii drawing setup
     Camera camera(0.0f, 0.0f, 0.0f, app_test::gAspect, 12, 0.1, 1000);
 	LightD light;
 	Screen screen(app_test::gScreenWidth, app_test::gScreenHeight, camera, light);
 
+    // mesh to update according to current structure state and render as ascii
     app_test::RigWireMesh wm;
 
 	while (1) { 
 		screen.start();
         
-        auto t1 = std::chrono::high_resolution_clock::now();
+        auto t1 = std::chrono::high_resolution_clock::now();  // perf
+
         for (int i = 0; i < app_test::num_iter; ++i)
             rs.integrate_system_radau2(app_test::dt);  // computing phys step
-        auto t2 = std::chrono::high_resolution_clock::now();
+
+        auto t2 = std::chrono::high_resolution_clock::now();  // perf
         std::chrono::duration<double, std::milli> ms = t2 - t1;
 
+        // update mesh according to current structure state
         for (int i = 0; i < rs.get_conns_num(); ++i)
         {
             vec3 pa = rs.m_s.nodes_pos[rs.m_s.conns_node_a[i]];
@@ -99,13 +113,15 @@ int main(int argc, char* argv[])
         // should look like below
 		app_test::drawMeshWire(wm, '#', screen);  
 
+        // perf note (added test if buffer is too small to avoid segfaults)
         if ( std::size(app_test::perf_note) < app_test::gScreenWidth - 2  )
             sprintf(&screen.buffer[app_test::gScreenHeight - 2][1], app_test::perf_note, rs.get_nodes_num(), rs.get_conns_num(), app_test::num_iter, ms.count());
 
 		screen.print(); // Print the entire screen
-		//std::cout << "[PERF] integrate_system_radau2 iter time ms = " << ms.count() << std::endl;
 		screen.clear(); // Clear the screen
 	}
+
+    return 0;
 }
 
 
@@ -242,6 +258,7 @@ void create_tower(RigSystemCommon& rs, int num_levels)
 
 void RigWireMesh::update_wire(int id, const Vert& a, const Vert& b, bool broken)
 {
+    // resize the vectors if necessary - will reallocate a bit initially but impact should be minor
     if (id + 1> wires.size()) wires.resize(id+1);
     if (id + 1> wbroken.size()) wbroken.resize(id+1);
     wires[id] = { a, b };
@@ -290,6 +307,8 @@ void drawMeshWire(RigWireMesh m, char c, Screen& s)
 
 		project(wire, s.camera.projMat);
 		centerFlipY(wire, s);
+
+        // draw the wire (correct drawn with content of c, broken with '.')
 		drawWire(wire, m.wbroken[i] ? '.' : c, s);
 	}
 }

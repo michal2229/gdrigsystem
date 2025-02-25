@@ -10,21 +10,41 @@ namespace rigsystem
 //rigsystem::vec3 v(const Vector3& v) { return rigsystem::vec3(v.x, v.y, v.z); }
 //Vector3 v(const rigsystem::vec3& v) { return Vector3(v.x, v.y, v.z); }
 
+// some constants
 namespace c
-{
-    inline constexpr float sqrt6 = 2.449489743f;
-    //const c1 = (4.0 - sqrt6) / 10.0;
-    //const c2 = (4.0 + sqrt6) / 10.0;
-    inline constexpr float A11 = (88.0 - 7.0 * sqrt6) / 360.0;
-    inline constexpr float A12 = (296.0 - 169.0 * sqrt6) / 1800.0;
-    inline constexpr float A21 = (296.0 + 169.0 * sqrt6) / 1800.0;
-    inline constexpr float A22 = (88.0 + 7.0 * sqrt6) / 360.0;
-    inline constexpr float b1 = (16.0 - sqrt6) / 36.0;
-    inline constexpr float b2 = (16.0 + sqrt6) / 36.0;
+{   
 
-    const vec3 GRAVITY = vec3(0.0f, -9.81f, 0.0f);
-    const int MAX_ITER = 2;
-    const float TOL = 1e-4;    
+namespace radau2
+{
+
+inline constexpr float sqrt6 = 2.449489743f;
+//const c1 = (4.0 - sqrt6) / 10.0;
+//const c2 = (4.0 + sqrt6) / 10.0;
+inline constexpr float A11 = (88.0f - 7.0f * sqrt6) / 360.0f;
+inline constexpr float A12 = (296.0f - 169.0f * sqrt6) / 1800.0f;
+inline constexpr float A21 = (296.0f + 169.0f * sqrt6) / 1800.0f;
+inline constexpr float A22 = (88.0f + 7.0f * sqrt6) / 360.0f;
+inline constexpr float b1 = (16.0f - sqrt6) / 36.0f;
+inline constexpr float b2 = (16.0f + sqrt6) / 36.0f;
+
+}
+
+namespace world
+{
+
+const vec3 gravity = vec3(0.0f, -9.81f, 0.0f);
+// TODO: air friction, etc
+
+}
+
+namespace system
+{
+
+const int max_iter_num = 16;
+const float max_error = 1e-4f;    
+
+}
+
 }
 
 void zero(std::vector<vec3>& v)
@@ -38,29 +58,6 @@ void copy( std::span<const vec3> vi, std::vector<vec3>& vo)
     for (int i = 0; i < vi.size(); ++i) vo[i] = vi[i];
 }
 
-namespace {
-    std::vector<vec3> K1_vel;
-    std::vector<vec3> K1_acc;
-    std::vector<vec3> K2_vel;
-    std::vector<vec3> K2_acc;
-
-    std::vector<vec3> pos1;
-    std::vector<vec3> vel1;
-    std::vector<vec3> pos2;
-    std::vector<vec3> vel2;
-
-    std::vector<vec3> accel1;
-    std::vector<vec3> accel2;
-
-    std::vector<vec3> new_K1_vel;
-    std::vector<vec3> new_K1_acc;
-    std::vector<vec3> new_K2_vel;
-    std::vector<vec3> new_K2_acc;
-
-    std::vector<vec3> forces;
-    std::vector<vec3> frc_out;
-    std::vector<vec3> accel;
-}
 
 void RigSystemCommon::clear()
 {
@@ -110,8 +107,8 @@ void RigSystemCommon::compute_system_forces( std::span<const vec3> pos_in, std::
     const auto num_nodes = get_nodes_num();
     const auto num_conns = get_conns_num();
     
-    forces.resize(num_nodes);
-    copy(m_s.nodes_frc, forces);
+    m_s.forces.resize(num_nodes);
+    copy(m_s.nodes_frc, m_s.forces);
 
     for(int ci = 0; ci < m_s.get_conns_num(); ci++)
     {
@@ -136,13 +133,13 @@ void RigSystemCommon::compute_system_forces( std::span<const vec3> pos_in, std::
         const float fdamp = damp * (relative_vel.dot(dir));
         const vec3 force = (fspring + fdamp) * dir;
 
-        forces[ni] += force;
-        forces[nj] -= force;
+        m_s.forces[ni] += force;
+        m_s.forces[nj] -= force;
     }
 
     for (int i = 0; i < num_nodes; ++i) 
     {
-        forces[i] += m_s.nodes_mass[i] * c::GRAVITY;
+        m_s.forces[i] += m_s.nodes_mass[i] * c::world::gravity;
     }
 }
 
@@ -159,7 +156,7 @@ void RigSystemCommon::system_derivative(std::span<const vec3> pos_in,
     acc_out.resize(num_nodes);
     for (int i = 0; i < num_nodes; ++i) 
     {
-        acc_out[i] = forces[i] / m_s.nodes_mass[i];
+        acc_out[i] = m_s.forces[i] / m_s.nodes_mass[i];
 
         //n.acc = acc_out[i];
     }
@@ -174,70 +171,70 @@ void RigSystemCommon::integrate_system_radau2( float dt )
     const auto num_nodes  = get_nodes_num();
     const auto num_conns = get_conns_num();
     
-    system_derivative(m_s.nodes_pos, m_s.nodes_vel, accel);
+    system_derivative(m_s.nodes_pos, m_s.nodes_vel, m_s.accel);
 
-    K1_vel.resize(num_nodes);
-    K2_vel.resize(num_nodes);
-    K1_acc.resize(num_nodes);
-    K2_acc.resize(num_nodes);
+    m_s.K1_vel.resize(num_nodes);
+    m_s.K2_vel.resize(num_nodes);
+    m_s.K1_acc.resize(num_nodes);
+    m_s.K2_acc.resize(num_nodes);
 
     for (int i = 0; i < num_nodes; ++i)
     {
-        K1_vel[i] = m_s.nodes_vel[i];
-        K2_vel[i] = m_s.nodes_vel[i];
-        K1_acc[i] = accel[i];
-        K2_acc[i] = accel[i];
+        m_s.K1_vel[i] = m_s.nodes_vel[i];
+        m_s.K2_vel[i] = m_s.nodes_vel[i];
+        m_s.K1_acc[i] = m_s.accel[i];
+        m_s.K2_acc[i] = m_s.accel[i];
     }
 
-    accel1.resize(num_nodes);
-    accel2.resize(num_nodes);
-    pos1.resize(num_nodes);
-    vel1.resize(num_nodes);
-    pos2.resize(num_nodes);
-    vel2.resize(num_nodes);
+    m_s.accel1.resize(num_nodes);
+    m_s.accel2.resize(num_nodes);
+    m_s.pos1.resize(num_nodes);
+    m_s.vel1.resize(num_nodes);
+    m_s.pos2.resize(num_nodes);
+    m_s.vel2.resize(num_nodes);
 
-    for (int i=0; i<c::MAX_ITER; ++i) 
+    for (int i=0; i<c::system::max_iter_num; ++i) 
     {
         for (int j=0; j<num_nodes; ++j) 
         {
             const auto& npos = m_s.nodes_pos[j];
             const auto& nvel = m_s.nodes_vel[j];
 
-            pos1[j] = ( npos + dt * (c::A11 * K1_vel[j] + c::A12 * K2_vel[j]) );
-            vel1[j] = ( nvel + dt * (c::A11 * K1_acc[j] + c::A12 * K2_acc[j]) );
-            pos2[j] = ( npos + dt * (c::A21 * K1_vel[j] + c::A22 * K2_vel[j]) );
-            vel2[j] = ( nvel + dt * (c::A21 * K1_acc[j] + c::A22 * K2_acc[j]) );
+            m_s.pos1[j] = ( npos + dt * (c::radau2::A11 * m_s.K1_vel[j] + c::radau2::A12 * m_s.K2_vel[j]) );
+            m_s.vel1[j] = ( nvel + dt * (c::radau2::A11 * m_s.K1_acc[j] + c::radau2::A12 * m_s.K2_acc[j]) );
+            m_s.pos2[j] = ( npos + dt * (c::radau2::A21 * m_s.K1_vel[j] + c::radau2::A22 * m_s.K2_vel[j]) );
+            m_s.vel2[j] = ( nvel + dt * (c::radau2::A21 * m_s.K1_acc[j] + c::radau2::A22 * m_s.K2_acc[j]) );
         }
 
-        system_derivative(pos1, vel1, accel1);
-        system_derivative(pos2, vel2, accel2);
+        system_derivative(m_s.pos1, m_s.vel1, m_s.accel1);
+        system_derivative(m_s.pos2, m_s.vel2, m_s.accel2);
 
-        new_K1_vel = vel1;
-        new_K1_acc = accel1;
-        new_K2_vel = vel2;
-        new_K2_acc = accel2;
+        m_s.new_K1_vel = m_s.vel1;
+        m_s.new_K1_acc = m_s.accel1;
+        m_s.new_K2_vel = m_s.vel2;
+        m_s.new_K2_acc = m_s.accel2;
         float diff = 0;
         for (int i=0; i<num_nodes; ++i)
         {
-            diff += new_K1_vel[i].distance_to(K1_vel[i]);
-            diff += new_K1_acc[i].distance_to(K1_acc[i]);
-            diff += new_K2_vel[i].distance_to(K2_vel[i]);
-            diff += new_K2_acc[i].distance_to(K2_acc[i]);
+            diff += m_s.new_K1_vel[i].distance_to(m_s.K1_vel[i]);
+            diff += m_s.new_K1_acc[i].distance_to(m_s.K1_acc[i]);
+            diff += m_s.new_K2_vel[i].distance_to(m_s.K2_vel[i]);
+            diff += m_s.new_K2_acc[i].distance_to(m_s.K2_acc[i]);
         }
 
-        if (diff < c::TOL)
+        if (diff < c::system::max_error)
         {
-            K1_vel = new_K1_vel;
-            K1_acc = new_K1_acc;
-            K2_vel = new_K2_vel;
-            K2_acc = new_K2_acc;
+            m_s.K1_vel = m_s.new_K1_vel;
+            m_s.K1_acc = m_s.new_K1_acc;
+            m_s.K2_vel = m_s.new_K2_vel;
+            m_s.K2_acc = m_s.new_K2_acc;
             break;
         }
 
-        K1_vel = new_K1_vel;
-        K1_acc = new_K1_acc;
-        K2_vel = new_K2_vel;
-        K2_acc = new_K2_acc;
+        m_s.K1_vel = m_s.new_K1_vel;
+        m_s.K1_acc = m_s.new_K1_acc;
+        m_s.K2_vel = m_s.new_K2_vel;
+        m_s.K2_acc = m_s.new_K2_acc;
     }
     for (int i=0; i<num_nodes; ++i)
     {
@@ -246,8 +243,8 @@ void RigSystemCommon::integrate_system_radau2( float dt )
 
         if (!m_s.nodes_pinned[i])
         {
-            npos = (npos + dt * (c::b1 * K1_vel[i] + c::b2 * K2_vel[i]));
-            nvel = (nvel + dt * (c::b2 * K1_acc[i] + c::b1 * K2_acc[i]));
+            npos = (npos + dt * (c::radau2::b1 * m_s.K1_vel[i] + c::radau2::b2 * m_s.K2_vel[i]));
+            nvel = (nvel + dt * (c::radau2::b2 * m_s.K1_acc[i] + c::radau2::b1 * m_s.K2_acc[i]));
         } 
         else 
         {

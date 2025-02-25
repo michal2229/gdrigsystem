@@ -36,7 +36,7 @@ struct Conn
 };
 
 
-struct RigStructure 
+struct RigStructureState 
 {
 	//std::vector<Node> nodes;  // vector of nodes
 	//std::vector<Conn> conns;  // vector of connections between nodes
@@ -98,6 +98,7 @@ struct RigStructure
 		return conns_len.size();
 	}
 
+	// main nodes and conns definition and state
 	std::vector<float> nodes_mass;
 	std::vector<vec3>  nodes_pos;
 	std::vector<vec3>  nodes_vel;
@@ -112,6 +113,29 @@ struct RigStructure
 	std::vector<float> conns_damp;
 	std::vector<float> conns_brk_thr;
 	std::vector<char>  conns_broken;
+
+	// helper/temp stuff, to avoid reallocating all the time
+	std::vector<vec3> K1_vel;
+    std::vector<vec3> K1_acc;
+    std::vector<vec3> K2_vel;
+    std::vector<vec3> K2_acc;
+
+    std::vector<vec3> pos1;
+    std::vector<vec3> vel1;
+    std::vector<vec3> pos2;
+    std::vector<vec3> vel2;
+
+    std::vector<vec3> accel1;
+    std::vector<vec3> accel2;
+
+    std::vector<vec3> new_K1_vel;
+    std::vector<vec3> new_K1_acc;
+    std::vector<vec3> new_K2_vel;
+    std::vector<vec3> new_K2_acc;
+
+    std::vector<vec3> forces;
+    std::vector<vec3> frc_out;
+    std::vector<vec3> accel;
 };
 
 
@@ -142,7 +166,7 @@ public:
 
 	void integrate_system_radau2( float dt );
 
-	RigStructure m_s;
+	RigStructureState m_s;
 private:
     int m_init_done = 0;
 };
