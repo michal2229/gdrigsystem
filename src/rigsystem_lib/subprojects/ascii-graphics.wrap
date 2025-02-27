@@ -1,0 +1,9 @@
+[wrap-git]
+url = https://github.com/addr0x414b/ascii-graphics.git
+revision = c2b4ff9c41647893f42901578b985a04aae0ee56
+depth = 1
+method = cmake
+
+[provide]
+program_names = agm, Camera, Lights, Mesh, Screen
+

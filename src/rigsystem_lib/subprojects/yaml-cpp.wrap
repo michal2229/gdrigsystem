@@ -1,0 +1,9 @@
+[wrap-git]
+url = https://github.com/libfoobar/libfoobar.git
+revision = 39f737443b05e4135e697cb91c2b7b18095acd53
+depth = 1
+method = cmake
+
+[provide]
+program_names = yaml-cpp
+

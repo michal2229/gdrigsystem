@@ -2,7 +2,7 @@
 
 namespace rigsystem {
 
-struct vec3 {
+struct alignas(32) vec3 {
     template <class T>
     vec3(T _x, T _y, T _z)
         : x(_x)
@@ -136,20 +136,20 @@ struct vec3 {
         return *this;
     }
 
-    float dot(const vec3& o) const { return x * o.x + y * o.y + z * o.z; }
+    inline float dot(const vec3& o) const noexcept { return x * o.x + y * o.y + z * o.z; }
 
-    vec3 cross(const vec3& o) const
+    inline vec3 cross(const vec3& o) const noexcept
     {
         return vec3(y * o.z - z * o.y, y * o.x - x * o.z, x * o.y - y * o.x);
     }
 
-    float length2() const { return dot(*this); }
+     float length2() const { return dot(*this); }
 
-    float length() const { return std::sqrt(length2()); }
+    inline float length() const noexcept { return std::sqrt(length2()); }
 
-    float distance_to(const vec3& o) const { return (*this - o).length(); }
+    inline float distance_to(const vec3& o) const noexcept { return (*this - o).length(); }
 
-    vec3 normalized() const
+    inline vec3 normalized() const noexcept
     {
         float l = length();
         return (l > 0.0f) ? (*this / l) : vec3(0.f, 0.f, 0.f);

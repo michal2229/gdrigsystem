@@ -1,7 +1,10 @@
 #pragma once
 
+#include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <span>
+#include <string>
 #include <vector>
 
 #include "rigsystem_vec3.hpp"
@@ -73,7 +76,19 @@ struct RigStructureState {
 
         conns_node_a.push_back(c.i);
         conns_node_b.push_back(c.j);
-        conns_len.push_back(c.len);
+
+        if (c.len < 0.0f && nodes_pos.size() > std::max(c.i, c.j) + 1) {
+            conns_len.push_back(nodes_pos[c.i].distance_to(nodes_pos[c.j]));
+        } else {
+            if (c.len < 0.0f) {
+                std::cerr << "[ERROR] Connection length is negative for connection " << c.id << ": " << c.i << "-" << c.j << "\n";
+                conns_len.push_back(1.0f);
+            } else {
+
+                conns_len.push_back(c.len);
+            }
+        }
+
         conns_stiff.push_back(c.stiff);
         conns_damp.push_back(c.damp);
         conns_brk_thr.push_back(c.brk_thr);
@@ -126,11 +141,10 @@ struct RigStructureState {
 
 void zero(std::vector<vec3>& v);
 void copy(std::span<const vec3> vi, std::vector<vec3>& vo);
+// vec3 v(const YAML::Node& node);
 
 class RigSystemCommon {
 public:
-    void load_definition_from_file();
-
     void clear();
 
     void add_node(Node n);

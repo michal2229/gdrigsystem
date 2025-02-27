@@ -4,6 +4,7 @@
 #include "rigsystem_lib/src/rigsystem_common.hpp"
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/classes/node.hpp>
+#include <godot_cpp/variant/dictionary.hpp>
 
 #include <vector>
 
@@ -15,6 +16,7 @@ class Node3D;
 struct Vector3;
 
 inline rigsystem::vec3 v(const Vector3& v);
+inline rigsystem::vec3 av(const Array& v);
 inline Vector3 v(const rigsystem::vec3& v);
 
 class GDRigSystem : public Node {
@@ -30,8 +32,10 @@ public:
 	void _process(double delta) override;
 	void _physics_process(double delta) override;
 
-	void align_visuals();
+	void add_node(Dictionary node_dict, Dictionary node_defaults);
+	void add_conn(Dictionary conn_dict, Dictionary conn_defaults);
 
+	void align_visuals();
 	void initialize_nodes();
 	void initialize_connections();
 private:

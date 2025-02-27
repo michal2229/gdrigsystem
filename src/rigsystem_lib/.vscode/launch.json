@@ -1,50 +1,59 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    //
-    "version": "0.2.0",
-    "configurations": [
-
-      {
-        "name": "app_test - Build and debug",
-        "request": "launch",
-        "type": "cppdbg",        
-        "linux": {
-          "MIMode": "gdb",
-          //"envFile": "${workspaceFolder}/builddir/meson-vscode.env",
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  //
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "bo_app_test",  // build only
+      "request": "launch",
+      "type": "cppdbg",
+      "linux": {
+        "MIMode": "gdb"
+      },
+      "cwd": "${workspaceFolder}/builddir/",
+      "program": "/usr/bin/true",
+      "args": [],
+      "preLaunchTask": "Meson: Build all targets",
+      "stopAtEntry": false
+    },
+    {
+      "name": "bd_app_test",  // build + debug
+      "request": "launch",
+      "type": "cppdbg",
+      "linux": {
+        "MIMode": "gdb",
+      },
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "cwd": "${workspaceFolder}/builddir/",
+      "program": "${workspaceFolder}/builddir/app_test",
+      "args": [],
+      "environment": [
+        {
+          "name": "VARNAME",
+          "value": "42"
         },
-        "setupCommands": [
-          { 
-            "description": "Enable pretty-printing for gdb",
-            "text": "-enable-pretty-printing",
-            "ignoreFailures": true
-          }
+      ],
+      "stopAtEntry": false,
+      "preLaunchTask": "Meson: Build all targets",
+      "symbolOptions": {
+        "searchPaths": [
+          "${workspaceFolder}/builddir",
         ],
-        "cwd": "${workspaceFolder}/builddir/",
-        "program": "${workspaceFolder}/builddir/app_test",
-        "args": [ ],
-        
-        "environment": [
-          {
-            "name": "VARNAME",
-            "value": "42"
-          },
-        ],
-        "stopAtEntry": false,
-        "preLaunchTask": "Meson: Build all targets",
-        "symbolOptions": {
-          "searchPaths": [
-            "${workspaceFolder}/builddir",
-          ],
-          "searchMicrosoftSymbolServer": true,
-          "cachePath": "${workspaceFolder}\\builddir\\vscode-symbols-cache",
-          "moduleFilter": {
-            "mode": "loadAllButExcluded",
-            "excludedModules": []
-          }
+        "searchMicrosoftSymbolServer": true,
+        "cachePath": "${workspaceFolder}\\builddir\\vscode-symbols-cache",
+        "moduleFilter": {
+          "mode": "loadAllButExcluded",
+          "excludedModules": []
         }
       }
-    ]
-  }
-  
+    }
+  ]
+}

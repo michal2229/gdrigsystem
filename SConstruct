@@ -12,16 +12,18 @@ env = SConscript("godot-cpp/SConstruct")
 # - CPPDEFINES are for pre-processor defines
 # - LINKFLAGS are for linking flags
 
-env.Append(CCFLAGS=[ "-std=c++20", "-O3", "-flto", "-Wextra", "-Wall", "-Wno-unused-parameter"])
-env.Append(LINKFLAGS=["-flto"])
+env.Append(CCFLAGS=[ "-std=c++20", "-O3", "-g3", "-flto", "-ffast-math", "-Wextra", "-Wall", "-Wno-unused-parameter"])
+env.Append(LINKFLAGS=["-std=c++20", "-O3", "-g3", "-flto", "-ffast-math"])
 
 if env["platform"] not in ["android"]:
     env.Append(CCFLAGS=[ "-mtune=native", "-mavx2" ])
+    env.Append(LINKFLAGS=[ "-mtune=native", "-mavx2" ])
 
 # tweak this if you want to use different folders, or more folders, to store your source code in.
-env.Append(CCPATH=[
+env.Append(CPPPATH=[
+    "src/rigsystem_lib/subprojects/yaml-cpp/include/",
+    "src/rigsystem_lib/src/",
     "src/", 
-    "src/rigsystem_lib/src/"
 ])
 
 sources = [
@@ -36,6 +38,8 @@ sources = [
 #elif env["platform"] in ["linux", "windows"]:
 #    env.Append(CXXFLAGS=["-fopenmp"])
 #    env.Append(LINKFLAGS=["-fopenmp"])
+
+# print(env.Dump())
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(

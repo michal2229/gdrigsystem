@@ -1,9 +1,14 @@
 #include "rigsystem_common.hpp"
 // #include <omp.h>
 
-// #include <iostream>
+// #include <yaml-cpp/yaml.h> // uses exceptions
+
+#include <assert.h>
+#include <fstream>
+#include <iostream>
+
 // #include <godot_cpp/variant/utility_functions.hpp>
-#define DEBUG_PRINT(...) (void)0 // UtilityFunctions::print(__VA_ARGS__) //
+#define DEBUG_PRINT(...) (void)0 // godot::UtilityFunctions::print(__VA_ARGS__) //
 
 namespace rigsystem {
 
@@ -56,29 +61,30 @@ void copy(std::span<const vec3> vi, std::vector<vec3>& vo)
         vo[i] = vi[i];
 }
 
+
 void RigSystemCommon::clear() { m_s.clear(); }
 
 void RigSystemCommon::add_node(Node n)
 {
     m_s.add_node(n);
 
-    DEBUG_PRINT("[RigSystemCommon::add_node] n.id = " + String::num(n.id));
-    DEBUG_PRINT("[RigSystemCommon::add_node] n.mass = " + String::num(n.mass));
-    DEBUG_PRINT("[RigSystemCommon::add_node] n.pos = ( " + String::num(n.pos.x) + ", " + String::num(n.pos.y) + ", " + String::num(n.pos.z) + " )");
+    // DEBUG_PRINT("[RigSystemCommon::add_node] n.id = " + godot::String::num(n.id));
+    // DEBUG_PRINT("[RigSystemCommon::add_node] n.mass = " + godot::String::num(n.mass));
+    // DEBUG_PRINT("[RigSystemCommon::add_node] n.pos = ( " + godot::String::num(n.pos.x) + ", " + godot::String::num(n.pos.y) + ", " + godot::String::num(n.pos.z) + " )");
 }
 
 void RigSystemCommon::add_conn(Conn c)
 {
     m_s.add_conn(c);
 
-    DEBUG_PRINT("[RigSystemCommon::add_conn] c.id = " + String::num(c.id));
-    DEBUG_PRINT("[RigSystemCommon::add_conn] c.node_a = " + String::num(c.i));
-    DEBUG_PRINT("[RigSystemCommon::add_conn] c.node_b = " + String::num(c.j));
-    DEBUG_PRINT("[RigSystemCommon::add_conn] c.len = " + String::num(c.len));
-    DEBUG_PRINT("[RigSystemCommon::add_conn] c.stiff = " + String::num(c.stiff));
-    DEBUG_PRINT("[RigSystemCommon::add_conn] c.damp = " + String::num(c.damp));
-    DEBUG_PRINT("[RigSystemCommon::add_conn] c.brk_thr = " + String::num(c.brk_thr));
-    DEBUG_PRINT("[RigSystemCommon::add_conn] c.broken = " + String::num(c.broken));
+    DEBUG_PRINT("[RigSystemCommon::add_conn] c.id = " + godot::String::num(c.id));
+    DEBUG_PRINT("[RigSystemCommon::add_conn] c.node_a = " + godot::String::num(c.i));
+    DEBUG_PRINT("[RigSystemCommon::add_conn] c.node_b = " + godot::String::num(c.j));
+    DEBUG_PRINT("[RigSystemCommon::add_conn] c.len = " + godot::String::num(c.len));
+    DEBUG_PRINT("[RigSystemCommon::add_conn] c.stiff = " + godot::String::num(c.stiff));
+    DEBUG_PRINT("[RigSystemCommon::add_conn] c.damp = " + godot::String::num(c.damp));
+    DEBUG_PRINT("[RigSystemCommon::add_conn] c.brk_thr = " + godot::String::num(c.brk_thr));
+    DEBUG_PRINT("[RigSystemCommon::add_conn] c.broken = " + godot::String::num(c.broken));
 }
 
 size_t RigSystemCommon::get_nodes_num() const { return m_s.get_nodes_num(); }
@@ -99,17 +105,22 @@ void RigSystemCommon::compute_system_forces(std::span<const vec3> pos_in,
     for (size_t ci = 0; ci < m_s.get_conns_num(); ci++) {
         //      the hottest loop
 
-        if (m_s.conns_broken[ci])
+        [[unlikely]] if (m_s.conns_broken[ci])
             continue;
 
         const size_t ni = m_s.conns_node_a[ci];
         const size_t nj = m_s.conns_node_b[ci];
         const float lenn = m_s.conns_len[ci];
+        //assert(lenn > 0);
         const float stiff = m_s.conns_stiff[ci];
         const float damp = m_s.conns_damp[ci];
+        const vec3& pin_i = pos_in[ni];
+        const vec3& pin_j = pos_in[nj];
+        const vec3& vel_i = vel_in[ni];
+        const vec3& vel_j = vel_in[nj];
 
-        const vec3 delta = pos_in[nj] - pos_in[ni];
-        const vec3 relative_vel = vel_in[nj] - vel_in[ni];
+        const vec3 delta = pin_j - pin_i;
+        const vec3 relative_vel = vel_j - vel_i;
 
         const float dist = delta.length();
         const float extension = dist - lenn;
@@ -144,7 +155,7 @@ void RigSystemCommon::system_derivative(std::span<const vec3> pos_in,
         // n.acc = acc_out[i];
     }
 
-    DEBUG_PRINT("[RigSystemCommon::system_derivative] // } ");
+    // DEBUG_PRINT("[RigSystemCommon::system_derivative] // } ");
 }
 
 // ~15% time spent here according to callgrind and perf - not critical for now
@@ -200,7 +211,7 @@ void RigSystemCommon::integrate_system_radau2(float dt)
             diff += m_s.new_K2_acc[j].distance_to(m_s.K2_acc[j]);
         }
 
-        if (diff < c::system::max_error) {
+        [[unlikely]] if (diff < c::system::max_error) {
             m_s.K1_vel = m_s.new_K1_vel;
             m_s.K1_acc = m_s.new_K1_acc;
             m_s.K2_vel = m_s.new_K2_vel;
@@ -218,7 +229,7 @@ void RigSystemCommon::integrate_system_radau2(float dt)
         vec3& npos = m_s.nodes_pos[i];
         vec3& nvel = m_s.nodes_vel[i];
 
-        if (!m_s.nodes_pinned[i]) {
+        [[likely]] if (!m_s.nodes_pinned[i]) {
             npos = (npos + dt * (c::radau2::b1 * m_s.K1_vel[i] + c::radau2::b2 * m_s.K2_vel[i]));
             nvel = (nvel + dt * (c::radau2::b2 * m_s.K1_acc[i] + c::radau2::b1 * m_s.K2_acc[i]));
         } else {
@@ -234,16 +245,16 @@ void RigSystemCommon::integrate_system_radau2(float dt)
 
         const vec3 delta = m_s.nodes_pos[nj] - m_s.nodes_pos[ni];
         const float dist = delta.length();
-        if (dist < 0.00001f) {
+        [[unlikely]] if (dist < 0.00001f) {
             m_s.conns_broken[i] = true;
-            DEBUG_PRINT("[RigSystemCommon::integrate_system_radau2] broken!1");
+            // DEBUG_PRINT("[RigSystemCommon::integrate_system_radau2] broken!1");
             continue;
         }
 
         const float extension = dist - m_s.conns_len[i];
-        if (std::abs(extension) > m_s.conns_brk_thr[i]) {
+        [[unlikely]] if (std::abs(extension) > m_s.conns_brk_thr[i]) {
             m_s.conns_broken[i] = true;
-            DEBUG_PRINT("[RigSystemCommon::integrate_system_radau2] broken!2");
+            // DEBUG_PRINT("[RigSystemCommon::integrate_system_radau2] broken!2");
             continue;
         }
     }

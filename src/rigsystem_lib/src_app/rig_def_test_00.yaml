@@ -1,0 +1,674 @@
+# based on Bus RVI Agora L from Rigs of Rods (95bbUID-agoral.truck)
+
+node_defaults:
+  - { vel: [0.0, 0.0, 0.0], acc: [0.0, 0.0, 0.0], frc: [0.0, 0.0, 0.0], mass: 1.0, pinned: false }
+
+conn_defaults:
+  - { len: -1.0, stiff: 5000.0, damp: 100.0, brk_thr: 0.5, broken: false }
+
+nodes:
+- { id: 0, pos: [ 0.0, 0.5, 0.0 ] }
+- { id: 1, pos: [ 0.0, 0.1, 0.0 ] }
+- { id: 2, pos: [ 0.0, 0.5, 2.5 ] }
+- { id: 3, pos: [ 0.0, 0.1, 2.5 ] }
+- { id: 4, pos: [ 1.05, 0.5, 0.0 ] }
+- { id: 5, pos: [ 1.05, 0.0, 0.0 ] }
+- { id: 6, pos: [ 1.05, 0.5, 2.5 ] }
+- { id: 7, pos: [ 1.05, 0.0, 2.5 ] }
+- { id: 8, pos: [ 2.1, 0.5, 0.0 ] }
+- { id: 9, pos: [ 2.1, 0.0, 0.0 ] }
+- { id: 10, pos: [ 2.1, 0.5, 0.7 ] }
+- { id: 11, pos: [ 2.1, 0.0, 0.7 ] }
+- { id: 12, pos: [ 2.1, 0.5, 1.8 ] }
+- { id: 13, pos: [ 2.1, 0.0, 1.8 ] }
+- { id: 14, pos: [ 2.1, 0.5, 2.5 ] }
+- { id: 15, pos: [ 2.1, 0.0, 2.5 ] }
+- { id: 16, pos: [ 2.75, 0.5, 0.7 ] }
+- { id: 17, pos: [ 2.75, 0.0, 0.7 ] }
+- { id: 18, pos: [ 2.75, 0.5, 1.8 ] }
+- { id: 19, pos: [ 2.75, 0.0, 1.8 ] }
+- { id: 20, pos: [ 3.4, 0.5, 0.0 ] }
+- { id: 21, pos: [ 3.4, 0.0, 0.0 ] }
+- { id: 22, pos: [ 3.4, 0.5, 0.7 ] }
+- { id: 23, pos: [ 3.4, 0.0, 0.7 ] }
+- { id: 24, pos: [ 3.4, 0.5, 1.8 ] }
+- { id: 25, pos: [ 3.4, 0.0, 1.8 ] }
+- { id: 26, pos: [ 3.4, 0.5, 2.5 ] }
+- { id: 27, pos: [ 3.4, 0.0, 2.5 ] }
+- { id: 28, pos: [ 4.78, 0.5, 0.0 ] }
+- { id: 29, pos: [ 4.78, 0.0, 0.0 ] }
+- { id: 30, pos: [ 4.78, 0.5, 2.5 ] }
+- { id: 31, pos: [ 4.78, 0.0, 2.5 ] }
+- { id: 32, pos: [ 6.17, 0.5, 0.0 ] }
+- { id: 33, pos: [ 6.17, 0.0, 0.0 ] }
+- { id: 34, pos: [ 6.17, 0.5, 2.5 ] }
+- { id: 35, pos: [ 6.17, 0.0, 2.5 ] }
+- { id: 36, pos: [ 7.55, 0.5, 0.0 ] }
+- { id: 37, pos: [ 7.55, 0.0, 0.0 ] }
+- { id: 38, pos: [ 7.55, 0.5, 0.7 ] }
+- { id: 39, pos: [ 7.55, 0.0, 0.7 ] }
+- { id: 40, pos: [ 7.55, 0.5, 1.8 ] }
+- { id: 41, pos: [ 7.55, 0.0, 1.8 ] }
+- { id: 42, pos: [ 7.55, 0.5, 2.5 ] }
+- { id: 43, pos: [ 7.55, 0.0, 2.5 ] }
+- { id: 44, pos: [ 8.2, 0.5, 0.7 ] }
+- { id: 45, pos: [ 8.2, 0.0, 0.7 ] }
+- { id: 46, pos: [ 8.2, 0.5, 1.8 ] }
+- { id: 47, pos: [ 8.2, 0.0, 1.8 ] }
+- { id: 48, pos: [ 8.85, 0.5, 0.0 ] }
+- { id: 49, pos: [ 8.85, 0.0, 0.0 ] }
+- { id: 50, pos: [ 8.85, 0.5, 0.7 ] }
+- { id: 51, pos: [ 8.85, 0.0, 0.7 ] }
+- { id: 52, pos: [ 8.85, 0.5, 1.8 ] }
+- { id: 53, pos: [ 8.85, 0.0, 1.8 ] }
+- { id: 54, pos: [ 8.85, 0.5, 2.5 ] }
+- { id: 55, pos: [ 8.85, 0.0, 2.5 ] }
+- { id: 56, pos: [ 9.2, 0.5, 0.0 ] }
+- { id: 57, pos: [ 9.2, 0.0, 0.0 ] }
+- { id: 58, pos: [ 9.2, 0.5, 2.5 ] }
+- { id: 59, pos: [ 9.2, 0.0, 2.5 ] }
+- { id: 60, pos: [ 10.07, 0.5, 1.25 ] }
+- { id: 61, pos: [ 10.95, 0.5, 0.0 ] }
+- { id: 62, pos: [ 10.95, 0.0, 0.0 ] }
+- { id: 63, pos: [ 10.95, 0.5, 2.5 ] }
+- { id: 64, pos: [ 10.95, 0.0, 2.5 ] }
+- { id: 65, pos: [ 12.58, 0.5, 0.0 ] }
+- { id: 66, pos: [ 12.58, 0.0, 0.0 ] }
+- { id: 67, pos: [ 12.58, 0.5, 2.5 ] }
+- { id: 68, pos: [ 12.58, 0.0, 2.5 ] }
+- { id: 69, pos: [ 14.2, 0.5, 0.0 ] }
+- { id: 70, pos: [ 14.2, 0.0, 0.0 ] }
+- { id: 71, pos: [ 14.2, 0.5, 0.7 ] }
+- { id: 72, pos: [ 14.2, 0.0, 0.7 ] }
+- { id: 73, pos: [ 14.2, 0.5, 1.8 ] }
+- { id: 74, pos: [ 14.2, 0.0, 1.8 ] }
+- { id: 75, pos: [ 14.2, 0.5, 2.5 ] }
+- { id: 76, pos: [ 14.2, 0.0, 2.5 ] }
+- { id: 77, pos: [ 14.85, 0.5, 0.7 ] }
+- { id: 78, pos: [ 14.85, 0.0, 0.7 ] }
+- { id: 79, pos: [ 14.85, 0.5, 1.8 ] }
+- { id: 80, pos: [ 14.85, 0.0, 1.8 ] }
+- { id: 81, pos: [ 15.5, 0.5, 0.0 ] }
+- { id: 82, pos: [ 15.5, 0.0, 0.0 ] }
+- { id: 83, pos: [ 15.5, 0.5, 0.7 ] }
+- { id: 84, pos: [ 15.5, 0.0, 0.7 ] }
+- { id: 85, pos: [ 15.5, 0.5, 1.8 ] }
+- { id: 86, pos: [ 15.5, 0.0, 1.8 ] }
+- { id: 87, pos: [ 15.5, 0.5, 2.5 ] }
+- { id: 88, pos: [ 15.5, 0.0, 2.5 ] }
+- { id: 89, pos: [ 16.8, 0.5, 0.0 ] }
+- { id: 90, pos: [ 16.8, 0.0, 0.0 ] }
+- { id: 91, pos: [ 16.8, 0.5, 2.5 ] }
+- { id: 92, pos: [ 16.8, 0.0, 2.5 ] }
+- { id: 93, pos: [ 18.1, 0.7, 0.0 ] }
+- { id: 94, pos: [ 18.1, 0.2, 0.0 ] }
+- { id: 95, pos: [ 18.1, 0.7, 2.5 ] }
+- { id: 96, pos: [ 18.1, 0.2, 2.5 ] }
+- { id: 97, pos: [ 14.85, 0.0, 0.0 ] }
+- { id: 98, pos: [ 14.85, 0.0, 0.6 ] }
+- { id: 99, pos: [ 14.85, 0.0, 1.9 ] }
+- { id: 100, pos: [ 14.85, 0.0, 2.5 ] }
+- { id: 101, pos: [ 8.2, 0.0, 0.0 ] }
+- { id: 102, pos: [ 8.2, 0.0, 0.6 ] }
+- { id: 103, pos: [ 8.2, 0.0, 1.9 ] }
+- { id: 104, pos: [ 8.2, 0.0, 2.5 ] }
+- { id: 105, pos: [ 2.75, 0.0, 0.0 ] }
+- { id: 106, pos: [ 2.75, 0.5, 0.3 ] }
+- { id: 107, pos: [ 2.75, 0.0, 0.3 ] }
+- { id: 108, pos: [ 2.75, 0.5, 2.2 ] }
+- { id: 109, pos: [ 2.75, 0.0, 2.2 ] }
+- { id: 110, pos: [ 2.75, 0.0, 2.5 ] }
+- { id: 111, pos: [ 2.3, 0.0, 0.3 ] }
+- { id: 112, pos: [ 3.2, 0.0, 0.3 ] }
+- { id: 113, pos: [ 2.3, 0.0, 2.2 ] }
+- { id: 114, pos: [ 3.2, 0.0, 2.2 ] }
+- { id: 115, pos: [ 0.25, 2.8, 0.0 ] }
+- { id: 116, pos: [ 0.25, 2.8, 2.5 ] }
+- { id: 117, pos: [ 1.05, 2.8, 0.0 ] }
+- { id: 118, pos: [ 1.05, 2.8, 2.5 ] }
+- { id: 119, pos: [ 2.1, 2.8, 0.0 ] }
+- { id: 120, pos: [ 2.1, 2.8, 2.5 ] }
+- { id: 121, pos: [ 3.4, 2.8, 0.0 ] }
+- { id: 122, pos: [ 3.4, 2.8, 2.5 ] }
+- { id: 123, pos: [ 4.78, 2.8, 0.0 ] }
+- { id: 124, pos: [ 4.78, 2.8, 2.5 ] }
+- { id: 125, pos: [ 6.17, 2.8, 0.0 ] }
+- { id: 126, pos: [ 6.17, 2.8, 2.5 ] }
+- { id: 127, pos: [ 7.55, 2.8, 0.0 ] }
+- { id: 128, pos: [ 7.55, 2.8, 2.5 ] }
+- { id: 129, pos: [ 9.2, 2.8, 0.0 ] }
+- { id: 130, pos: [ 9.2, 2.8, 2.5 ] }
+- { id: 131, pos: [ 10.95, 2.8, 0.0 ] }
+- { id: 132, pos: [ 10.95, 2.8, 2.5 ] }
+- { id: 133, pos: [ 12.58, 2.8, 0.0 ] }
+- { id: 134, pos: [ 12.58, 2.8, 2.5 ] }
+- { id: 135, pos: [ 14.2, 2.8, 0.0 ] }
+- { id: 136, pos: [ 14.2, 2.8, 2.5 ] }
+- { id: 137, pos: [ 15.5, 2.8, 0.0 ] }
+- { id: 138, pos: [ 15.5, 2.8, 2.5 ] }
+- { id: 139, pos: [ 16.8, 2.8, 0.0 ] }
+- { id: 140, pos: [ 16.8, 2.8, 2.5 ] }
+- { id: 141, pos: [ 18.1, 2.8, 0.0 ] }
+- { id: 142, pos: [ 18.1, 2.8, 2.5 ] }
+- { id: 143, pos: [ 10.07, 0.0, 1.25 ] }
+- { id: 144, pos: [ 10.07, 0.25, 1.0 ] }
+- { id: 145, pos: [ 10.07, 0.25, 1.5 ] }
+- { id: 146, pos: [ 10.07, 0.25, 1.25 ] }
+- { id: 147, pos: [ 9.2, 3.15, 1.25 ] }
+- { id: 148, pos: [ 10.95, 3.15, 1.25 ] }
+- { id: 149, pos: [ 10.1, 2.0, 0.0 ] }
+- { id: 150, pos: [ 10.1, 2.0, 2.5 ] }
+
+conns:
+- { id: 0, node_a: 8, node_b: 10 }
+- { id: 1, node_a: 10, node_b: 12 }
+- { id: 2, node_a: 12, node_b: 14 }
+- { id: 3, node_a: 16, node_b: 18 }
+- { id: 4, node_a: 20, node_b: 22 }
+- { id: 5, node_a: 22, node_b: 24 }
+- { id: 6, node_a: 24, node_b: 26 }
+- { id: 7, node_a: 28, node_b: 30 }
+- { id: 8, node_a: 29, node_b: 31 }
+- { id: 9, node_a: 32, node_b: 34 }
+- { id: 10, node_a: 33, node_b: 35 }
+- { id: 11, node_a: 36, node_b: 38 }
+- { id: 12, node_a: 38, node_b: 40 }
+- { id: 13, node_a: 40, node_b: 42 }
+- { id: 14, node_a: 44, node_b: 46 }
+- { id: 15, node_a: 48, node_b: 50 }
+- { id: 16, node_a: 50, node_b: 52 }
+- { id: 17, node_a: 52, node_b: 54 }
+- { id: 18, node_a: 56, node_b: 58 }
+- { id: 19, node_a: 57, node_b: 59 }
+- { id: 20, node_a: 14, node_b: 15 }
+- { id: 21, node_a: 20, node_b: 21 }
+- { id: 22, node_a: 26, node_b: 27 }
+- { id: 23, node_a: 28, node_b: 29 }
+- { id: 24, node_a: 30, node_b: 31 }
+- { id: 25, node_a: 32, node_b: 33 }
+- { id: 26, node_a: 34, node_b: 35 }
+- { id: 27, node_a: 36, node_b: 37 }
+- { id: 28, node_a: 42, node_b: 43 }
+- { id: 29, node_a: 48, node_b: 49 }
+- { id: 30, node_a: 54, node_b: 55 }
+- { id: 31, node_a: 56, node_b: 57 }
+- { id: 32, node_a: 58, node_b: 59 }
+- { id: 33, node_a: 6, node_b: 14 }
+- { id: 34, node_a: 7, node_b: 15 }
+- { id: 35, node_a: 10, node_b: 16 }
+- { id: 36, node_a: 12, node_b: 18 }
+- { id: 37, node_a: 16, node_b: 22 }
+- { id: 38, node_a: 18, node_b: 24 }
+- { id: 39, node_a: 20, node_b: 28 }
+- { id: 40, node_a: 21, node_b: 29 }
+- { id: 41, node_a: 26, node_b: 30 }
+- { id: 42, node_a: 27, node_b: 31 }
+- { id: 43, node_a: 28, node_b: 32 }
+- { id: 44, node_a: 29, node_b: 33 }
+- { id: 45, node_a: 30, node_b: 34 }
+- { id: 46, node_a: 31, node_b: 35 }
+- { id: 47, node_a: 32, node_b: 36 }
+- { id: 48, node_a: 33, node_b: 37 }
+- { id: 49, node_a: 34, node_b: 42 }
+- { id: 50, node_a: 35, node_b: 43 }
+- { id: 51, node_a: 38, node_b: 44 }
+- { id: 52, node_a: 40, node_b: 46 }
+- { id: 53, node_a: 44, node_b: 50 }
+- { id: 54, node_a: 46, node_b: 52 }
+- { id: 55, node_a: 48, node_b: 56 }
+- { id: 56, node_a: 49, node_b: 57 }
+- { id: 57, node_a: 54, node_b: 58 }
+- { id: 58, node_a: 55, node_b: 59 }
+- { id: 59, node_a: 4, node_b: 14 }
+- { id: 60, node_a: 5, node_b: 15 }
+- { id: 61, node_a: 10, node_b: 18 }
+- { id: 62, node_a: 12, node_b: 16 }
+- { id: 63, node_a: 18, node_b: 22 }
+- { id: 64, node_a: 16, node_b: 24 }
+- { id: 65, node_a: 20, node_b: 30 }
+- { id: 66, node_a: 21, node_b: 31 }
+- { id: 67, node_a: 26, node_b: 28 }
+- { id: 68, node_a: 27, node_b: 29 }
+- { id: 69, node_a: 28, node_b: 34 }
+- { id: 70, node_a: 29, node_b: 35 }
+- { id: 71, node_a: 30, node_b: 32 }
+- { id: 72, node_a: 31, node_b: 33 }
+- { id: 73, node_a: 32, node_b: 42 }
+- { id: 74, node_a: 33, node_b: 43 }
+- { id: 75, node_a: 34, node_b: 36 }
+- { id: 76, node_a: 35, node_b: 37 }
+- { id: 77, node_a: 38, node_b: 46 }
+- { id: 78, node_a: 40, node_b: 44 }
+- { id: 79, node_a: 44, node_b: 52 }
+- { id: 80, node_a: 46, node_b: 50 }
+- { id: 81, node_a: 48, node_b: 58 }
+- { id: 82, node_a: 49, node_b: 59 }
+- { id: 83, node_a: 54, node_b: 56 }
+- { id: 84, node_a: 55, node_b: 57 }
+- { id: 85, node_a: 6, node_b: 15 }
+- { id: 86, node_a: 7, node_b: 14 }
+- { id: 87, node_a: 20, node_b: 29 }
+- { id: 88, node_a: 21, node_b: 28 }
+- { id: 89, node_a: 26, node_b: 31 }
+- { id: 90, node_a: 27, node_b: 30 }
+- { id: 91, node_a: 28, node_b: 33 }
+- { id: 92, node_a: 29, node_b: 32 }
+- { id: 93, node_a: 30, node_b: 35 }
+- { id: 94, node_a: 31, node_b: 34 }
+- { id: 95, node_a: 32, node_b: 37 }
+- { id: 96, node_a: 33, node_b: 36 }
+- { id: 97, node_a: 34, node_b: 43 }
+- { id: 98, node_a: 35, node_b: 42 }
+- { id: 99, node_a: 48, node_b: 57 }
+- { id: 100, node_a: 49, node_b: 56 }
+- { id: 101, node_a: 54, node_b: 59 }
+- { id: 102, node_a: 55, node_b: 58 }
+- { id: 103, node_a: 28, node_b: 31 }
+- { id: 104, node_a: 29, node_b: 30 }
+- { id: 105, node_a: 32, node_b: 35 }
+- { id: 106, node_a: 33, node_b: 34 }
+- { id: 107, node_a: 56, node_b: 59 }
+- { id: 108, node_a: 57, node_b: 58 }
+- { id: 109, node_a: 6, node_b: 12 }
+- { id: 110, node_a: 7, node_b: 13 }
+- { id: 111, node_a: 4, node_b: 10 }
+- { id: 112, node_a: 5, node_b: 11 }
+- { id: 113, node_a: 24, node_b: 30 }
+- { id: 114, node_a: 25, node_b: 31 }
+- { id: 115, node_a: 22, node_b: 28 }
+- { id: 116, node_a: 23, node_b: 29 }
+- { id: 117, node_a: 34, node_b: 40 }
+- { id: 118, node_a: 35, node_b: 41 }
+- { id: 119, node_a: 32, node_b: 38 }
+- { id: 120, node_a: 33, node_b: 39 }
+- { id: 121, node_a: 50, node_b: 56 }
+- { id: 122, node_a: 51, node_b: 57 }
+- { id: 123, node_a: 52, node_b: 58 }
+- { id: 124, node_a: 53, node_b: 59 }
+- { id: 125, node_a: 6, node_b: 13 }
+- { id: 126, node_a: 7, node_b: 12 }
+- { id: 127, node_a: 4, node_b: 11 }
+- { id: 128, node_a: 5, node_b: 10 }
+- { id: 129, node_a: 24, node_b: 31 }
+- { id: 130, node_a: 25, node_b: 30 }
+- { id: 131, node_a: 22, node_b: 29 }
+- { id: 132, node_a: 23, node_b: 28 }
+- { id: 133, node_a: 32, node_b: 39 }
+- { id: 134, node_a: 33, node_b: 38 }
+- { id: 135, node_a: 34, node_b: 41 }
+- { id: 136, node_a: 35, node_b: 40 }
+- { id: 137, node_a: 38, node_b: 50 }
+- { id: 138, node_a: 50, node_b: 57 }
+- { id: 139, node_a: 51, node_b: 56 }
+- { id: 140, node_a: 52, node_b: 59 }
+- { id: 141, node_a: 53, node_b: 58 }
+- { id: 142, node_a: 58, node_b: 146 }
+- { id: 143, node_a: 59, node_b: 146 }
+- { id: 144, node_a: 56, node_b: 146 }
+- { id: 145, node_a: 57, node_b: 146 }
+- { id: 146, node_a: 52, node_b: 146 }
+- { id: 147, node_a: 53, node_b: 146 }
+- { id: 148, node_a: 50, node_b: 146 }
+- { id: 149, node_a: 51, node_b: 146 }
+- { id: 150, node_a: 146, node_b: 63 }
+- { id: 151, node_a: 146, node_b: 64 }
+- { id: 152, node_a: 146, node_b: 61 }
+- { id: 153, node_a: 146, node_b: 62 }
+- { id: 154, node_a: 146, node_b: 67 }
+- { id: 155, node_a: 146, node_b: 68 }
+- { id: 156, node_a: 146, node_b: 65 }
+- { id: 157, node_a: 146, node_b: 66 }
+- { id: 158, node_a: 52, node_b: 60 }
+- { id: 159, node_a: 50, node_b: 60 }
+- { id: 160, node_a: 53, node_b: 143 }
+- { id: 161, node_a: 51, node_b: 143 }
+- { id: 162, node_a: 60, node_b: 143 }
+- { id: 163, node_a: 58, node_b: 60 }
+- { id: 164, node_a: 59, node_b: 143 }
+- { id: 165, node_a: 56, node_b: 60 }
+- { id: 166, node_a: 57, node_b: 143 }
+- { id: 167, node_a: 56, node_b: 143 }
+- { id: 168, node_a: 57, node_b: 60 }
+- { id: 169, node_a: 58, node_b: 143 }
+- { id: 170, node_a: 59, node_b: 60 }
+- { id: 171, node_a: 53, node_b: 60 }
+- { id: 172, node_a: 52, node_b: 143 }
+- { id: 173, node_a: 50, node_b: 143 }
+- { id: 174, node_a: 51, node_b: 60 }
+- { id: 175, node_a: 144, node_b: 145 }
+- { id: 176, node_a: 144, node_b: 61 }
+- { id: 177, node_a: 144, node_b: 62 }
+- { id: 178, node_a: 144, node_b: 67 }
+- { id: 179, node_a: 144, node_b: 68 }
+- { id: 180, node_a: 145, node_b: 63 }
+- { id: 181, node_a: 145, node_b: 64 }
+- { id: 182, node_a: 145, node_b: 65 }
+- { id: 183, node_a: 145, node_b: 66 }
+- { id: 184, node_a: 145, node_b: 143 }
+- { id: 185, node_a: 143, node_b: 144 }
+- { id: 186, node_a: 144, node_b: 60 }
+- { id: 187, node_a: 60, node_b: 145 }
+- { id: 188, node_a: 60, node_b: 146 }
+- { id: 189, node_a: 146, node_b: 143 }
+- { id: 190, node_a: 144, node_b: 146 }
+- { id: 191, node_a: 146, node_b: 145 }
+- { id: 192, node_a: 61, node_b: 63 }
+- { id: 193, node_a: 62, node_b: 64 }
+- { id: 194, node_a: 65, node_b: 67 }
+- { id: 195, node_a: 66, node_b: 68 }
+- { id: 196, node_a: 69, node_b: 71 }
+- { id: 197, node_a: 71, node_b: 73 }
+- { id: 198, node_a: 73, node_b: 75 }
+- { id: 199, node_a: 77, node_b: 79 }
+- { id: 200, node_a: 81, node_b: 83 }
+- { id: 201, node_a: 83, node_b: 85 }
+- { id: 202, node_a: 85, node_b: 87 }
+- { id: 203, node_a: 89, node_b: 91 }
+- { id: 204, node_a: 90, node_b: 92 }
+- { id: 205, node_a: 93, node_b: 95 }
+- { id: 206, node_a: 94, node_b: 96 }
+- { id: 207, node_a: 61, node_b: 65 }
+- { id: 208, node_a: 62, node_b: 66 }
+- { id: 209, node_a: 63, node_b: 67 }
+- { id: 210, node_a: 64, node_b: 68 }
+- { id: 211, node_a: 65, node_b: 69 }
+- { id: 212, node_a: 66, node_b: 70 }
+- { id: 213, node_a: 67, node_b: 75 }
+- { id: 214, node_a: 68, node_b: 76 }
+- { id: 215, node_a: 73, node_b: 79 }
+- { id: 216, node_a: 77, node_b: 83 }
+- { id: 217, node_a: 79, node_b: 85 }
+- { id: 218, node_a: 81, node_b: 89 }
+- { id: 219, node_a: 82, node_b: 90 }
+- { id: 220, node_a: 87, node_b: 91 }
+- { id: 221, node_a: 88, node_b: 92 }
+- { id: 222, node_a: 89, node_b: 93 }
+- { id: 223, node_a: 90, node_b: 94 }
+- { id: 224, node_a: 91, node_b: 95 }
+- { id: 225, node_a: 92, node_b: 96 }
+- { id: 226, node_a: 61, node_b: 62 }
+- { id: 227, node_a: 63, node_b: 64 }
+- { id: 228, node_a: 65, node_b: 66 }
+- { id: 229, node_a: 67, node_b: 68 }
+- { id: 230, node_a: 69, node_b: 70 }
+- { id: 231, node_a: 75, node_b: 76 }
+- { id: 232, node_a: 81, node_b: 82 }
+- { id: 233, node_a: 87, node_b: 88 }
+- { id: 234, node_a: 89, node_b: 90 }
+- { id: 235, node_a: 91, node_b: 92 }
+- { id: 236, node_a: 93, node_b: 94 }
+- { id: 237, node_a: 95, node_b: 96 }
+- { id: 238, node_a: 63, node_b: 65 }
+- { id: 239, node_a: 64, node_b: 66 }
+- { id: 240, node_a: 61, node_b: 67 }
+- { id: 241, node_a: 62, node_b: 68 }
+- { id: 242, node_a: 67, node_b: 69 }
+- { id: 243, node_a: 68, node_b: 70 }
+- { id: 244, node_a: 65, node_b: 75 }
+- { id: 245, node_a: 66, node_b: 76 }
+- { id: 246, node_a: 73, node_b: 77 }
+- { id: 247, node_a: 71, node_b: 77 }
+- { id: 248, node_a: 79, node_b: 83 }
+- { id: 249, node_a: 77, node_b: 85 }
+- { id: 250, node_a: 87, node_b: 89 }
+- { id: 251, node_a: 88, node_b: 90 }
+- { id: 252, node_a: 81, node_b: 91 }
+- { id: 253, node_a: 82, node_b: 92 }
+- { id: 254, node_a: 91, node_b: 93 }
+- { id: 255, node_a: 92, node_b: 94 }
+- { id: 256, node_a: 89, node_b: 95 }
+- { id: 257, node_a: 90, node_b: 96 }
+- { id: 258, node_a: 61, node_b: 66 }
+- { id: 259, node_a: 62, node_b: 65 }
+- { id: 260, node_a: 63, node_b: 68 }
+- { id: 261, node_a: 64, node_b: 67 }
+- { id: 262, node_a: 65, node_b: 70 }
+- { id: 263, node_a: 66, node_b: 69 }
+- { id: 264, node_a: 67, node_b: 76 }
+- { id: 265, node_a: 68, node_b: 75 }
+- { id: 266, node_a: 81, node_b: 90 }
+- { id: 267, node_a: 82, node_b: 89 }
+- { id: 268, node_a: 87, node_b: 92 }
+- { id: 269, node_a: 88, node_b: 91 }
+- { id: 270, node_a: 89, node_b: 94 }
+- { id: 271, node_a: 90, node_b: 93 }
+- { id: 272, node_a: 91, node_b: 96 }
+- { id: 273, node_a: 92, node_b: 95 }
+- { id: 274, node_a: 63, node_b: 62 }
+- { id: 275, node_a: 64, node_b: 61 }
+- { id: 276, node_a: 67, node_b: 66 }
+- { id: 277, node_a: 68, node_b: 65 }
+- { id: 278, node_a: 91, node_b: 90 }
+- { id: 279, node_a: 92, node_b: 89 }
+- { id: 280, node_a: 95, node_b: 94 }
+- { id: 281, node_a: 96, node_b: 93 }
+- { id: 282, node_a: 67, node_b: 73 }
+- { id: 283, node_a: 68, node_b: 74 }
+- { id: 284, node_a: 67, node_b: 74 }
+- { id: 285, node_a: 68, node_b: 73 }
+- { id: 286, node_a: 65, node_b: 71 }
+- { id: 287, node_a: 66, node_b: 72 }
+- { id: 288, node_a: 65, node_b: 72 }
+- { id: 289, node_a: 66, node_b: 71 }
+- { id: 290, node_a: 85, node_b: 91 }
+- { id: 291, node_a: 86, node_b: 92 }
+- { id: 292, node_a: 85, node_b: 92 }
+- { id: 293, node_a: 86, node_b: 91 }
+- { id: 294, node_a: 83, node_b: 89 }
+- { id: 295, node_a: 84, node_b: 90 }
+- { id: 296, node_a: 83, node_b: 90 }
+- { id: 297, node_a: 84, node_b: 89 }
+- { id: 298, node_a: 97, node_b: 98 }
+- { id: 299, node_a: 99, node_b: 100 }
+- { id: 300, node_a: 98, node_b: 70 }
+- { id: 301, node_a: 99, node_b: 76 }
+- { id: 302, node_a: 101, node_b: 102 }
+- { id: 303, node_a: 102, node_b: 103 }
+- { id: 304, node_a: 103, node_b: 104 }
+- { id: 305, node_a: 39, node_b: 102 }
+- { id: 306, node_a: 41, node_b: 103 }
+- { id: 307, node_a: 41, node_b: 102 }
+- { id: 308, node_a: 39, node_b: 103 }
+- { id: 309, node_a: 102, node_b: 37 }
+- { id: 310, node_a: 103, node_b: 43 }
+- { id: 311, node_a: 105, node_b: 107 }
+- { id: 312, node_a: 107, node_b: 17 }
+- { id: 313, node_a: 19, node_b: 109 }
+- { id: 314, node_a: 109, node_b: 110 }
+- { id: 315, node_a: 105, node_b: 106 }
+- { id: 316, node_a: 106, node_b: 107 }
+- { id: 317, node_a: 106, node_b: 16 }
+- { id: 318, node_a: 110, node_b: 108 }
+- { id: 319, node_a: 108, node_b: 109 }
+- { id: 320, node_a: 108, node_b: 18 }
+- { id: 321, node_a: 11, node_b: 107 }
+- { id: 322, node_a: 107, node_b: 23 }
+- { id: 323, node_a: 10, node_b: 106 }
+- { id: 324, node_a: 106, node_b: 22 }
+- { id: 325, node_a: 12, node_b: 108 }
+- { id: 326, node_a: 108, node_b: 24 }
+- { id: 327, node_a: 13, node_b: 109 }
+- { id: 328, node_a: 109, node_b: 25 }
+- { id: 329, node_a: 111, node_b: 107 }
+- { id: 330, node_a: 107, node_b: 112 }
+- { id: 331, node_a: 111, node_b: 106 }
+- { id: 332, node_a: 106, node_b: 112 }
+- { id: 333, node_a: 111, node_b: 105 }
+- { id: 334, node_a: 105, node_b: 112 }
+- { id: 335, node_a: 113, node_b: 110 }
+- { id: 336, node_a: 110, node_b: 114 }
+- { id: 337, node_a: 113, node_b: 109 }
+- { id: 338, node_a: 109, node_b: 114 }
+- { id: 339, node_a: 113, node_b: 108 }
+- { id: 340, node_a: 108, node_b: 114 }
+- { id: 341, node_a: 0, node_b: 115 }
+- { id: 342, node_a: 2, node_b: 116 }
+- { id: 343, node_a: 4, node_b: 117 }
+- { id: 344, node_a: 6, node_b: 118 }
+- { id: 345, node_a: 8, node_b: 119 }
+- { id: 346, node_a: 14, node_b: 120 }
+- { id: 347, node_a: 20, node_b: 121 }
+- { id: 348, node_a: 26, node_b: 122 }
+- { id: 349, node_a: 28, node_b: 123 }
+- { id: 350, node_a: 30, node_b: 124 }
+- { id: 351, node_a: 32, node_b: 125 }
+- { id: 352, node_a: 34, node_b: 126 }
+- { id: 353, node_a: 36, node_b: 127 }
+- { id: 354, node_a: 42, node_b: 128 }
+- { id: 355, node_a: 56, node_b: 129 }
+- { id: 356, node_a: 58, node_b: 130 }
+- { id: 357, node_a: 115, node_b: 116 }
+- { id: 358, node_a: 117, node_b: 118 }
+- { id: 359, node_a: 119, node_b: 120 }
+- { id: 360, node_a: 121, node_b: 122 }
+- { id: 361, node_a: 123, node_b: 124 }
+- { id: 362, node_a: 125, node_b: 126 }
+- { id: 363, node_a: 127, node_b: 128 }
+- { id: 364, node_a: 129, node_b: 130 }
+- { id: 365, node_a: 115, node_b: 117 }
+- { id: 366, node_a: 117, node_b: 119 }
+- { id: 367, node_a: 119, node_b: 121 }
+- { id: 368, node_a: 121, node_b: 123 }
+- { id: 369, node_a: 123, node_b: 125 }
+- { id: 370, node_a: 125, node_b: 127 }
+- { id: 371, node_a: 127, node_b: 129 }
+- { id: 372, node_a: 116, node_b: 118 }
+- { id: 373, node_a: 118, node_b: 120 }
+- { id: 374, node_a: 120, node_b: 122 }
+- { id: 375, node_a: 122, node_b: 124 }
+- { id: 376, node_a: 124, node_b: 126 }
+- { id: 377, node_a: 126, node_b: 128 }
+- { id: 378, node_a: 128, node_b: 130 }
+- { id: 379, node_a: 2, node_b: 115 }
+- { id: 380, node_a: 0, node_b: 116 }
+- { id: 381, node_a: 58, node_b: 129 }
+- { id: 382, node_a: 130, node_b: 56 }
+- { id: 383, node_a: 0, node_b: 117 }
+- { id: 384, node_a: 4, node_b: 115 }
+- { id: 385, node_a: 2, node_b: 118 }
+- { id: 386, node_a: 6, node_b: 116 }
+- { id: 387, node_a: 4, node_b: 119 }
+- { id: 388, node_a: 8, node_b: 117 }
+- { id: 389, node_a: 6, node_b: 120 }
+- { id: 390, node_a: 14, node_b: 118 }
+- { id: 391, node_a: 8, node_b: 121 }
+- { id: 392, node_a: 20, node_b: 119 }
+- { id: 393, node_a: 14, node_b: 122 }
+- { id: 394, node_a: 26, node_b: 120 }
+- { id: 395, node_a: 20, node_b: 123 }
+- { id: 396, node_a: 28, node_b: 121 }
+- { id: 397, node_a: 26, node_b: 124 }
+- { id: 398, node_a: 30, node_b: 122 }
+- { id: 399, node_a: 28, node_b: 125 }
+- { id: 400, node_a: 32, node_b: 123 }
+- { id: 401, node_a: 30, node_b: 126 }
+- { id: 402, node_a: 34, node_b: 124 }
+- { id: 403, node_a: 32, node_b: 127 }
+- { id: 404, node_a: 36, node_b: 125 }
+- { id: 405, node_a: 34, node_b: 128 }
+- { id: 406, node_a: 42, node_b: 126 }
+- { id: 407, node_a: 36, node_b: 129 }
+- { id: 408, node_a: 56, node_b: 127 }
+- { id: 409, node_a: 42, node_b: 130 }
+- { id: 410, node_a: 54, node_b: 128 }
+- { id: 411, node_a: 115, node_b: 118 }
+- { id: 412, node_a: 116, node_b: 117 }
+- { id: 413, node_a: 117, node_b: 120 }
+- { id: 414, node_a: 118, node_b: 119 }
+- { id: 415, node_a: 120, node_b: 121 }
+- { id: 416, node_a: 119, node_b: 122 }
+- { id: 417, node_a: 122, node_b: 123 }
+- { id: 418, node_a: 121, node_b: 124 }
+- { id: 419, node_a: 124, node_b: 125 }
+- { id: 420, node_a: 123, node_b: 126 }
+- { id: 421, node_a: 126, node_b: 127 }
+- { id: 422, node_a: 125, node_b: 128 }
+- { id: 423, node_a: 128, node_b: 129 }
+- { id: 424, node_a: 127, node_b: 130 }
+- { id: 425, node_a: 61, node_b: 131 }
+- { id: 426, node_a: 63, node_b: 132 }
+- { id: 427, node_a: 65, node_b: 133 }
+- { id: 428, node_a: 67, node_b: 134 }
+- { id: 429, node_a: 69, node_b: 135 }
+- { id: 430, node_a: 75, node_b: 136 }
+- { id: 431, node_a: 81, node_b: 137 }
+- { id: 432, node_a: 87, node_b: 138 }
+- { id: 433, node_a: 89, node_b: 139 }
+- { id: 434, node_a: 91, node_b: 140 }
+- { id: 435, node_a: 93, node_b: 141 }
+- { id: 436, node_a: 95, node_b: 142 }
+- { id: 437, node_a: 131, node_b: 132 }
+- { id: 438, node_a: 133, node_b: 134 }
+- { id: 439, node_a: 135, node_b: 136 }
+- { id: 440, node_a: 137, node_b: 138 }
+- { id: 441, node_a: 139, node_b: 140 }
+- { id: 442, node_a: 141, node_b: 142 }
+- { id: 443, node_a: 131, node_b: 133 }
+- { id: 444, node_a: 133, node_b: 135 }
+- { id: 445, node_a: 135, node_b: 137 }
+- { id: 446, node_a: 137, node_b: 139 }
+- { id: 447, node_a: 139, node_b: 141 }
+- { id: 448, node_a: 132, node_b: 134 }
+- { id: 449, node_a: 134, node_b: 136 }
+- { id: 450, node_a: 136, node_b: 138 }
+- { id: 451, node_a: 138, node_b: 140 }
+- { id: 452, node_a: 140, node_b: 142 }
+- { id: 453, node_a: 63, node_b: 131 }
+- { id: 454, node_a: 61, node_b: 132 }
+- { id: 455, node_a: 95, node_b: 141 }
+- { id: 456, node_a: 93, node_b: 142 }
+- { id: 457, node_a: 61, node_b: 133 }
+- { id: 458, node_a: 65, node_b: 131 }
+- { id: 459, node_a: 63, node_b: 134 }
+- { id: 460, node_a: 67, node_b: 132 }
+- { id: 461, node_a: 65, node_b: 135 }
+- { id: 462, node_a: 69, node_b: 133 }
+- { id: 463, node_a: 67, node_b: 136 }
+- { id: 464, node_a: 75, node_b: 134 }
+- { id: 465, node_a: 69, node_b: 137 }
+- { id: 466, node_a: 81, node_b: 135 }
+- { id: 467, node_a: 75, node_b: 138 }
+- { id: 468, node_a: 87, node_b: 136 }
+- { id: 469, node_a: 81, node_b: 139 }
+- { id: 470, node_a: 89, node_b: 137 }
+- { id: 471, node_a: 87, node_b: 140 }
+- { id: 472, node_a: 91, node_b: 138 }
+- { id: 473, node_a: 89, node_b: 141 }
+- { id: 474, node_a: 93, node_b: 139 }
+- { id: 475, node_a: 91, node_b: 142 }
+- { id: 476, node_a: 95, node_b: 140 }
+- { id: 477, node_a: 131, node_b: 134 }
+- { id: 478, node_a: 132, node_b: 133 }
+- { id: 479, node_a: 133, node_b: 136 }
+- { id: 480, node_a: 134, node_b: 135 }
+- { id: 481, node_a: 135, node_b: 138 }
+- { id: 482, node_a: 136, node_b: 137 }
+- { id: 483, node_a: 137, node_b: 140 }
+- { id: 484, node_a: 138, node_b: 139 }
+- { id: 485, node_a: 139, node_b: 142 }
+- { id: 486, node_a: 140, node_b: 141 }
+- { id: 487, node_a: 129, node_b: 147 }
+- { id: 488, node_a: 147, node_b: 130 }
+- { id: 489, node_a: 127, node_b: 147 }
+- { id: 490, node_a: 128, node_b: 147 }
+- { id: 491, node_a: 131, node_b: 148 }
+- { id: 492, node_a: 148, node_b: 132 }
+- { id: 493, node_a: 133, node_b: 148 }
+- { id: 494, node_a: 134, node_b: 148 }
+- { id: 495, node_a: 129, node_b: 149 }
+- { id: 496, node_a: 149, node_b: 131 }
+- { id: 497, node_a: 130, node_b: 150 }
+- { id: 498, node_a: 150, node_b: 132 }
+- { id: 499, node_a: 111, node_b: 17 }
+- { id: 500, node_a: 112, node_b: 17 }
+- { id: 501, node_a: 113, node_b: 19 }
+- { id: 502, node_a: 114, node_b: 19 }
+- { id: 503, node_a: 98, node_b: 77 }
+- { id: 504, node_a: 99, node_b: 79 }
+- { id: 505, node_a: 98, node_b: 79 }
+- { id: 506, node_a: 99, node_b: 77 }
+- { id: 507, node_a: 44, node_b: 102 }
+- { id: 508, node_a: 46, node_b: 103 }
+- { id: 509, node_a: 16, node_b: 107 }
+- { id: 510, node_a: 18, node_b: 109 }
+- { id: 511, node_a: 147, node_b: 148 }
