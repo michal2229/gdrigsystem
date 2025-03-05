@@ -74,11 +74,11 @@ Mat4& RigRendererAscii::get_transform(size_t mesh_id, size_t transform_id)
     return transforms[mesh_id][transform_id];
 }
 
-void RigRendererAscii::update(size_t mesh_id, const rigsystem::RigSystemCommon& rig)
+void RigRendererAscii::update(size_t mesh_id, rigsystem::RigSystemCommon& rig)
 {
     for (size_t i = 0; i < rig.get_conns_num(); ++i) {
-        vec3 pa = rig.m_s.nodes_pos[rig.m_s.conns_node_a[i]];
-        vec3 pb = rig.m_s.nodes_pos[rig.m_s.conns_node_b[i]];
+        vec3& pa = rig.get_conn_node_a_pos(i);
+        vec3& pb = rig.get_conn_node_b_pos(i);
 
         Vert va = { pa.x, pa.y, pa.z };
         Vert vb = { pb.x, pb.y, pb.z };
@@ -89,7 +89,7 @@ void RigRendererAscii::update(size_t mesh_id, const rigsystem::RigSystemCommon& 
         }
 
         // updating wire mesh
-        meshes[mesh_id].update_wire(i, va, vb, rig.m_s.conns_broken[i]);
+        meshes[mesh_id].update_wire(i, va, vb, rig.get_conn_broken(i));
     }
 }
 

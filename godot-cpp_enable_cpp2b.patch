@@ -7,13 +7,13 @@ index e645f39..8ce7515 100644
          print("Using LTO: " + env["lto"])
  
 -    # Require C++17
-+    # Require C++20
++    # Require C++2b
      if env.get("is_msvc", False):
 -        env.Append(CXXFLAGS=["/std:c++17"])
-+        env.Append(CXXFLAGS=["/std:c++20"])
++        env.Append(CXXFLAGS=["/std:c++2b"])
      else:
 -        env.Append(CXXFLAGS=["-std=c++17"])
-+        env.Append(CXXFLAGS=["-std=c++20"])
++        env.Append(CXXFLAGS=["-std=c++2b"])
  
      # Disable exception handling. Godot doesn't use exceptions anywhere, and this
      # saves around 20% of binary size and very significant build time.

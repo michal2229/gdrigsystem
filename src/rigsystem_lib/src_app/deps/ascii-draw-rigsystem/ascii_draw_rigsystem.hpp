@@ -39,7 +39,7 @@ public:
     RigWireMesh& get_mesh(size_t id);
     size_t add_transform(size_t mesh_id, Mat4 t);
     Mat4& get_transform(size_t mesh_id, size_t transform_id);
-    void update(size_t mesh_id, const rigsystem::RigSystemCommon& rig);
+    void update(size_t mesh_id, rigsystem::RigSystemCommon& rig);
     void render();
 
     // ascii screen drawing functions - modified vs library to draw lines instread of triangles

@@ -5,8 +5,15 @@
   //
   "version": "0.2.0",
   "configurations": [
+
+    
+
+
+
+
+
     {
-      "name": "bo_app_test",  // build only
+      "name": "build",  // build only
       "request": "launch",
       "type": "cppdbg",
       "linux": {
@@ -15,11 +22,17 @@
       "cwd": "${workspaceFolder}/builddir/",
       "program": "/usr/bin/true",
       "args": [],
+      "environment": [
+        {
+          "name": "CCX",
+          "value": "clang++"
+        },
+      ],
       "preLaunchTask": "Meson: Build all targets",
       "stopAtEntry": false
     },
     {
-      "name": "bd_app_test",  // build + debug
+      "name": "app_test",  // build + debug
       "request": "launch",
       "type": "cppdbg",
       "linux": {
@@ -35,12 +48,37 @@
       "cwd": "${workspaceFolder}/builddir/",
       "program": "${workspaceFolder}/builddir/app_test",
       "args": [],
-      "environment": [
+      "stopAtEntry": false,
+      "preLaunchTask": "Meson: Build all targets",
+      "symbolOptions": {
+        "searchPaths": [
+          "${workspaceFolder}/builddir",
+        ],
+        "searchMicrosoftSymbolServer": true,
+        "cachePath": "${workspaceFolder}\\builddir\\vscode-symbols-cache",
+        "moduleFilter": {
+          "mode": "loadAllButExcluded",
+          "excludedModules": []
+        }
+      }
+    },
+    {
+      "name": "app_perf_test",  // build + debug
+      "request": "launch",
+      "type": "cppdbg",
+      "linux": {
+        "MIMode": "gdb",
+      },
+      "setupCommands": [
         {
-          "name": "VARNAME",
-          "value": "42"
-        },
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
       ],
+      "cwd": "${workspaceFolder}/builddir/",
+      "program": "${workspaceFolder}/builddir/app_perf_test",
+      "args": [],
       "stopAtEntry": false,
       "preLaunchTask": "Meson: Build all targets",
       "symbolOptions": {

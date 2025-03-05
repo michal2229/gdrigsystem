@@ -7,6 +7,8 @@
 #include <godot_cpp/variant/dictionary.hpp>
 
 #include <vector>
+#include <thread>
+#include <future>
 
 
 namespace godot {
@@ -32,16 +34,25 @@ public:
 	void _process(double delta) override;
 	void _physics_process(double delta) override;
 
-	void add_node(Dictionary node_dict, Dictionary node_defaults);
-	void add_conn(Dictionary conn_dict, Dictionary conn_defaults);
+	void simulate(bool active);
+	void visualize(bool active);
+	void clear();
+	void add_node(Dictionary node_dict, Dictionary node_defaults, Node* visual);
+	void add_conn(Dictionary conn_dict, Dictionary conn_defaults, Node* visual);
 
 	void align_visuals();
-	void initialize_nodes();
-	void initialize_connections();
+	void initialize_nodes(Node* parent);
+	void initialize_connections(Node* parent);
 private:
 	rigsystem::RigSystemCommon m_rs;
+	std::thread t;
+	std::future<void> fut;
 	
 	int m_init_done = 0;
+	bool state_sim_active = false;
+	bool state_visuals_active = false;
+	//bool thread_running = true;
+	double last_delta = 0.01;
 
 	std::vector<Node*> m_p_nodes;
 	std::vector<Node*> m_p_conns;

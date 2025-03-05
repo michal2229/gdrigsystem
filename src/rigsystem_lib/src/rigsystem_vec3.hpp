@@ -1,8 +1,17 @@
+#pragma once
+
 #include <cmath>
+#include <fstream>
+
+//#if __has_include(<format>)
+//#include <format>
+//#endif
 
 namespace rigsystem {
 
-struct alignas(32) vec3 {
+
+
+struct vec3 {
     template <class T>
     vec3(T _x, T _y, T _z)
         : x(_x)
@@ -22,6 +31,11 @@ struct alignas(32) vec3 {
         x = 0.f;
         y = 0.f;
         z = 0.f;
+    }
+
+    bool operator==(const vec3& o) const
+    {
+        return x == o.x && y == o.y && z == o.z;
     }
 
     vec3 operator+(const vec3& o) const
@@ -143,9 +157,11 @@ struct alignas(32) vec3 {
         return vec3(y * o.z - z * o.y, y * o.x - x * o.z, x * o.y - y * o.x);
     }
 
-     float length2() const { return dot(*this); }
+    inline float length2() const { return dot(*this); }
 
     inline float length() const noexcept { return std::sqrt(length2()); }
+
+    inline float distance_to2(const vec3& o) const noexcept { return (*this - o).length2(); }
 
     inline float distance_to(const vec3& o) const noexcept { return (*this - o).length(); }
 
@@ -157,6 +173,11 @@ struct alignas(32) vec3 {
 
     float x, y, z;
 };
+
+inline std::ostream& operator<<(std::ostream& os, const vec3& v)
+{
+    return os << "( " << v.x << ", " << v.y << ", " << v.z << " )";
+}
 
 template <class T>
 vec3 operator+(const T& l, const vec3& r)
@@ -183,3 +204,17 @@ vec3 operator/(const T& l, const vec3& r)
 }
 
 } // namespace rigsystem
+
+//#ifdef __cpp_lib_format
+// template <>
+// struct std::formatter<rigsystem::vec3> {
+//     constexpr auto parse(std::format_parse_context& context)
+//     {
+//         return context.begin();
+//     }
+//     auto format(const rigsystem::vec3& v, std::format_context& context) const
+//     {
+//         return std::format_to(context.out(), "( {}, {}, {} )", v.x, v.y, v.z);
+//     }
+// };
+//#endif

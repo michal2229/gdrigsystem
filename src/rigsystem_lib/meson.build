@@ -2,11 +2,11 @@ project(
   'rigsystem_lib',
   'cpp',
   version: '0.1',
-  default_options: ['warning_level=3', 'cpp_std=c++20', 'werror=false'],
+  default_options: ['warning_level=3', 'cpp_std=c++23', 'werror=false'],
 )
 
-#if get_option('buildtype') == 'fast'
-ccld_flags = ['-fno-exceptions', '-O3', '-ffast-math', '-mavx2', '-g3', '-fno-omit-frame-pointer' ]
+#if get_option('buildtype') == 'fast'  # , 
+ccld_flags = ['-O3', '-g3', '-fno-exceptions', '-ffast-math', '-mavx2', '-fno-omit-frame-pointer' ]
 add_project_arguments(ccld_flags, language: 'cpp')
 add_project_link_arguments(ccld_flags, language: 'cpp')
 #endif
@@ -51,7 +51,7 @@ libasciidrawrigsystem_src = ['src_app/deps/ascii-draw-rigsystem/ascii_draw_rigsy
 libasciidrawrigsystem = library(
   'asciidrawrigsystem',
   libasciidrawrigsystem_src,
-  include_directories: [librigsystem_incdir, libasciigraphics_incdir, libasciidrawrigsystem_incdir],
+  include_directories: [librigsystem_incdir, libasciigraphics_incdir ],
   link_with: [librigsystem, libasciigraphics],
 )
 
@@ -61,6 +61,14 @@ src_app_test = ['src_app/app_test.cpp']
 app_test = executable(
   'app_test',
   src_app_test,
-  include_directories: [librigsystem_incdir, libasciigraphics_incdir, libasciidrawrigsystem_incdir],
+  include_directories: [librigsystem_incdir, libasciigraphics_incdir, libasciidrawrigsystem_incdir ],
   link_with: [librigsystem, libasciigraphics, libasciidrawrigsystem],
+)
+
+src_app_perf_test = ['src_app/app_perf_test.cpp']
+app_perf_test = executable(
+  'app_perf_test',
+  src_app_perf_test,
+  include_directories: [librigsystem_incdir],
+  link_with: [librigsystem],
 )

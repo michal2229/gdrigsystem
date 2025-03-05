@@ -27,7 +27,7 @@ const float damping_factor = 100.f;
 const float break_threshold = 0.2f;
 
 // sim params
-const size_t num_iter = 100;
+const size_t num_iter = 1000;
 inline constexpr float dt = 1.0f / 60.f / static_cast<float>(num_iter);
 
 // perf note added to ascii buffer
@@ -64,7 +64,7 @@ int main()
     rrend.add_transform(mesh_id, adr::translateXYZ(-4.5f, -1.5f, 0.0f));
     size_t tansform_id = rrend.add_transform(mesh_id, rotY(0.0f));
     rrend.add_transform(mesh_id, adr::translateXYZ(0.0f, 0.0f, -4.5f));
-
+    
     rrend.add_transform(mesh_id2, adr::translateXYZ(-20.0f, -10.0f, -20.0f));
 
     float roty = -60.0f;
@@ -114,16 +114,16 @@ void create_tower(RigSystemCommon& rs, size_t num_levels, bool horizontal)
     for (size_t i = 0; i < num_levels; ++i) {
         for (size_t j = 0; j < 2; ++j) {
             for (size_t k = 0; k < 2; ++k) {
-                Node n = { .id = i * 4 + j * 2 + k,
-                    .mass = 1,
+                Node n = { 
                     .pos = horizontal ? vec3(1.0f + i, j - 0.5f, (j ^ k) - 0.5f)
                                       : vec3(j - 0.5f, 1.0f + i, (j ^ k) - 0.5f),
                     .vel = vec3(0.0f, 0.0f, 0.0f),
                     .acc = vec3(0.0f, 0.0f, 0.0f),
                     .frc = vec3(0.0f, 0.0f, 0.0f),
+                    .mass = 1,
                     .pinned = i == 0 };
                 rs.add_node(n);
-                std::cout << "[NODE] id = " << n.id << ", pos = (" << n.pos.x << ", "
+                std::cout << "[NODE] id = " << i * 4 + j * 2 + k << ", pos = (" << n.pos.x << ", "
                           << n.pos.y << ", " << n.pos.z << " )\n";
             }
         }
@@ -150,30 +150,30 @@ void create_tower(RigSystemCommon& rs, size_t num_levels, bool horizontal)
 
         for (size_t ci = 0; ci < conns_i.size(); ++ci) {
             const auto& p = conns_i[ci];
-            Conn c = { .id = i * conns_i.size() + ci,
-                .i = p.first,
-                .j = p.second,
+            Conn c = {
+                .node_a = p.first,
+                .node_b = p.second,
                 .len = -1.0f,
                 .stiff = stiffness_factor,
                 .damp = damping_factor,
                 .brk_thr = break_threshold,
                 .broken = false };
 
-            std::cout << "[CONN] id = " << c.id << ", node_a = " << c.i
-                      << ", node_b = " << c.j << "\n";
+            std::cout << "[CONN] node_a = " << c.node_a
+                      << ", node_b = " << c.node_b << "\n";
             rs.add_conn(c);
         }
     }
 
     for (size_t i = 0; i < rs.get_conns_num(); ++i) {
-        const vec3& pa = rs.m_s.nodes_pos[rs.m_s.conns_node_a[i]];
-        const vec3& pb = rs.m_s.nodes_pos[rs.m_s.conns_node_b[i]];
+        const vec3& pa = rs.get_conn_node_a_pos(i);
+        const vec3& pb = rs.get_conn_node_b_pos(i);
         const auto dist = pa.distance_to(pb);
-        rs.m_s.conns_len[i] = dist;
+        rs.get_conn_len(i) = dist;
     }
 
     for (size_t i = 0; i < rs.get_nodes_num(); ++i) {
-        rigsystem::vec3& p = rs.m_s.nodes_pos[i];
+        rigsystem::vec3& p = rs.get_node_pos(i);
 
         p.x += (static_cast<float>(rand() % 10 + 1) / 10.0f - 0.5f) / 4.0f;
         p.y += (static_cast<float>(rand() % 10 + 1) / 10.0f - 0.5f) / 4.0f;

@@ -1,142 +1,137 @@
 #pragma once
 
+#include "rigsystem_vec3.hpp"
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <iostream>
+#include <fstream>
 #include <span>
 #include <string>
 #include <vector>
 
-#include "rigsystem_vec3.hpp"
-
 namespace rigsystem {
+
+// some constants
+namespace c {
+
+    namespace radau2 {
+
+        inline constexpr float sqrt6 = 2.449489743f;
+        // const c1 = (4.0 - sqrt6) / 10.0;
+        // const c2 = (4.0 + sqrt6) / 10.0;
+        inline constexpr float A11 = (88.0f - 7.0f * sqrt6) / 360.0f;
+        inline constexpr float A12 = (296.0f - 169.0f * sqrt6) / 1800.0f;
+        inline constexpr float A21 = (296.0f + 169.0f * sqrt6) / 1800.0f;
+        inline constexpr float A22 = (88.0f + 7.0f * sqrt6) / 360.0f;
+        inline constexpr float b1 = (16.0f - sqrt6) / 36.0f;
+        inline constexpr float b2 = (16.0f + sqrt6) / 36.0f;
+
+    } // namespace radau2
+
+    namespace world {
+
+        const vec3 gravity = vec3(0.0f, -9.81f, 0.0f);
+        // TODO: air friction, etc
+
+    } // namespace world
+
+    namespace system {
+
+        inline constexpr int max_iter_num = 16;
+        inline constexpr float max_error = 1e-3f;
+        inline constexpr float max_error2 = max_error * max_error;
+
+    } // namespace system
+
+} // namespace c
+
 struct Node {
-    size_t id; // node id
-    float mass; // node mass
-    vec3 pos; // node position
-    vec3 vel; // node velocity
-    vec3 acc; // node acceleration
-    vec3 frc; // forces acting on node
-    bool pinned; // node pinned flag
-    char _padding[3] = {};
+    vec3 pos; // node position          // 3*4 = 12B | 12
+    vec3 vel; // node velocity          // 3*4 = 12B | 24
+    vec3 acc; // node acceleration      // 3*4 = 12B | 36
+    vec3 frc; // forces acting on node  // 3*4 = 12B | 48
+    float mass; // node mass            //        4B | 52
+    char pinned; // node pinned flag    //        1B | 53
 };
 
-struct Conn {
-    size_t id; // connection id
-    size_t i; // node a id
-    size_t j; // node b id
-    float len; // connection rest length
-    float stiff; // connection stiffness param
-    float damp; // connection damping param
-    float brk_thr; // connection break threshold
-    bool broken; // connection broken flag
-    char _padding[7] = {};
+struct alignas(16) Conn {
+    uint16_t node_a; // node a id                 // 2B | 4
+    uint16_t node_b; // node b id                 // 2B | 8
+    float len; // connection rest length          // 4B | 12
+    float stiff; // connection stiffness param    // 4B | 16
+    float damp; // connection damping param       // 4B | 20
+    float brk_thr; // connection break threshold  // 4B | 24
+    char broken; // connection broken flag        // 1B | 25
 };
 
 struct RigStructureState {
-    // std::vector<Node> nodes;  // vector of nodes
-    // std::vector<Conn> conns;  // vector of connections between nodes
+    std::vector<Node> nodes; // vector of nodes
+    std::vector<Conn> conns; // vector of connections between nodes
+    std::vector<vec3> node_forces_external;
+
+    size_t nodes_num = 0;  // TODO: maybe use vec.size() ?
+    size_t conns_num = 0;
 
     void clear()
     {
-        // nodes.clear();
-        // conns.clear();
+        nodes.clear();
+        conns.clear();
+        node_forces_external.clear();
 
-        nodes_mass.clear();
-        nodes_pos.clear();
-        nodes_vel.clear();
-        nodes_acc.clear();
-        nodes_frc.clear();
-        nodes_pinned.clear();
+        nodes_num = 0;
+        conns_num = 0;
+    }
 
-        conns_node_a.clear();
-        conns_node_b.clear();
-        conns_len.clear();
-        conns_stiff.clear();
-        conns_damp.clear();
-        conns_brk_thr.clear();
-        conns_broken.clear();
+    void nodes_reserve(size_t n)
+    {
+        nodes.reserve(n);
+        node_forces_external.reserve(n);
+    }
+
+    void conns_reserve(size_t n)
+    {
+        conns.reserve(n);
     }
 
     void add_node(Node n)
     {
-        // nodes.push_back(n);
+        nodes.push_back(n);
+        node_forces_external.emplace_back(vec3());
 
-        nodes_mass.push_back(n.mass);
-        nodes_pos.push_back(n.pos);
-        nodes_vel.push_back(n.vel);
-        nodes_acc.push_back(n.acc);
-        nodes_frc.push_back(n.frc);
-        nodes_pinned.push_back(n.pinned);
+        nodes_num++;
     }
 
-    void add_conn(Conn c)
+    void add_conn(Conn cc)
     {
-        // conns.push_back(c);
+        Conn c = cc;
 
-        conns_node_a.push_back(c.i);
-        conns_node_b.push_back(c.j);
-
-        if (c.len < 0.0f && nodes_pos.size() > std::max(c.i, c.j) + 1) {
-            conns_len.push_back(nodes_pos[c.i].distance_to(nodes_pos[c.j]));
+        if (c.len < 0.0f && nodes_num > std::max(c.node_a, c.node_b) + 1) {
+            c.len = nodes[c.node_a].pos.distance_to(nodes[c.node_b].pos);
         } else {
             if (c.len < 0.0f) {
-                std::cerr << "[ERROR] Connection length is negative for connection " << c.id << ": " << c.i << "-" << c.j << "\n";
-                conns_len.push_back(1.0f);
-            } else {
-
-                conns_len.push_back(c.len);
-            }
+                std::cerr << "[ERROR] Connection length is negative for connection: " << c.node_a << "-" << c.node_b << "\n";
+                c.len = 1.0f;
+            } 
         }
 
-        conns_stiff.push_back(c.stiff);
-        conns_damp.push_back(c.damp);
-        conns_brk_thr.push_back(c.brk_thr);
-        conns_broken.push_back(c.broken);
+        conns.push_back(c);
+        conns_num++;
     }
 
-    size_t get_nodes_num() const { return nodes_pos.size(); }
+    inline size_t get_nodes_num() const { return nodes_num; }
 
-    size_t get_conns_num() const { return conns_len.size(); }
+    inline size_t get_conns_num() const { return conns_num; }
 
-    // main nodes and conns definition and state
-    std::vector<float> nodes_mass;
-    std::vector<vec3> nodes_pos;
-    std::vector<vec3> nodes_vel;
-    std::vector<vec3> nodes_acc;
-    std::vector<vec3> nodes_frc;
-    std::vector<char> nodes_pinned;
 
-    std::vector<size_t> conns_node_a;
-    std::vector<size_t> conns_node_b;
-    std::vector<float> conns_len;
-    std::vector<float> conns_stiff;
-    std::vector<float> conns_damp;
-    std::vector<float> conns_brk_thr;
-    std::vector<char> conns_broken;
-
-    // helper/temp stuff, to avoid reallocating all the time
-    std::vector<vec3> K1_vel;
-    std::vector<vec3> K1_acc;
-    std::vector<vec3> K2_vel;
-    std::vector<vec3> K2_acc;
-
-    std::vector<vec3> pos1;
-    std::vector<vec3> vel1;
-    std::vector<vec3> pos2;
-    std::vector<vec3> vel2;
-
-    std::vector<vec3> accel1;
-    std::vector<vec3> accel2;
-
-    std::vector<vec3> new_K1_vel;
-    std::vector<vec3> new_K1_acc;
-    std::vector<vec3> new_K2_vel;
-    std::vector<vec3> new_K2_acc;
-
-    std::vector<vec3> forces;
-    std::vector<vec3> frc_out;
-    std::vector<vec3> accel;
+    // temp stuff
+    std::vector<Node> nodes_1;
+    std::vector<Node> nodes_2;
+    std::vector<Node> nodes_k1;
+    std::vector<Node> nodes_k2;
+    std::vector<Node> nodes_k1_new;
+    std::vector<Node> nodes_k2_new;
 };
 
 void zero(std::vector<vec3>& v);
@@ -153,18 +148,50 @@ public:
     size_t get_nodes_num() const;
     size_t get_conns_num() const;
 
+    inline vec3& get_node_pos(size_t id)
+    {
+        return m_rss.nodes[id].pos;
+    }
+
+    inline vec3& get_node_vel(size_t id)
+    {
+        return m_rss.nodes[id].vel;
+    }
+
+    inline vec3& get_node_frc(size_t id)
+    {
+        return m_rss.nodes[id].frc;
+    }
+
+    inline float& get_conn_len(size_t id)
+    {
+        return m_rss.conns[id].len;
+    }
+
+    inline char& get_conn_broken(size_t id)
+    {
+        return m_rss.conns[id].broken;
+    }
+
+    inline vec3& get_conn_node_a_pos(size_t id)
+    {
+        return m_rss.nodes[m_rss.conns[id].node_a].pos;
+    }
+
+    inline vec3& get_conn_node_b_pos(size_t id)
+    {
+        return m_rss.nodes[m_rss.conns[id].node_b].pos;
+    }
+
     void simulate(float dt);
 
-    void compute_system_forces(std::span<const vec3> pos_in,
-        std::span<const vec3> vel_in);
+    void compute_system_forces(std::vector<Node>& nv);
 
-    void system_derivative(std::span<const vec3> pos_in,
-        std::span<const vec3> vel_in,
-        std::vector<vec3>& acc_out);
+    void system_derivative(std::vector<Node>& nv);
 
     void integrate_system_radau2(float dt);
 
-    RigStructureState m_s;
+    RigStructureState m_rss;
 };
 
 } // namespace rigsystem

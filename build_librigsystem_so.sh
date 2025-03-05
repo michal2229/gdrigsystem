@@ -4,6 +4,7 @@ set -eux
 reset
 
 export CXX=clang++ 
+#export CXX=g++ 
 
 
 pushd src/rigsystem_lib
