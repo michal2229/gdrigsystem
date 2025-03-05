@@ -14,22 +14,21 @@ The addon consists of the inner lib (rigsystem_lib/) and outer godot interface (
 
 The gdrigsystem.cpp part is registered as a Godot class inherited from godot::Node, and is to be used as a child of a rig scene.
 It uses rigsystem_lib part for computation and serves as a glue between it and Godot.
-Currently the GDRigSystem node expects two nodes on the same hierarchy level in the scene: RigNodes and RigConns. Children of these nodes (rig node, rig conn in the scenes dir) are the nodes and connections of the rig. I made a script rig_definition.gd, that can fill them on game start and create multi-level towers for testing.
 
 The rigsystem_lib part is where the physics is implemented. Currently only Radau IIA is implemented as an integrator. 
-It is designed to be used also outside of Godot extension, as it does not use any Godot stuff - there is a sample app (app_test) that uses rigsystem_lib as a dynamic dependency. 
+It is designed to be used also outside of Godot extension, as it does not use any Godot stuff - there are a sample apps (app_test, app_perf_test) that use rigsystem_lib as a dynamic dependency. 
 
 
 ### build
 Build steps for usage with Godot:
 - clone the repo with --recursive flag
-- apply the patch in godot-cpp dir: godot-cpp_enable_cpp20.patch (you should have C++20 capable compiler; scripts configured for llvm/clang)
+- apply the patch in godot-cpp dir: godot-cpp_enable_cpp2b.patch (you should have C++23 capable compiler; scripts configured for llvm/clang)
 - run ./build_all.sh if on Linux, for other platforms please refer to [Godot GDExtension docs](https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/gdextension_cpp_example.html) (if you have ANDROID_HOME env var defined, it will also try to build for Android; check [docs about compiling for Android](https://docs.godotengine.org/en/stable/contributing/development/compiling/compiling_for_android.html) to set up the SDK)
 - you should have it built now, it is ready to be placed in your Godot project
 
 Build steps for standalone rigsystem_lib usage:
 - run ./build_librigsystem_so.sh  (you need meson and ninja)
-- sample app is included (app_test - renders pinned tower structure in ASCII and shows basic perf info, see gif below), will be built alongside the library
+- sample apps are included (app_test - renders pinned tower structure in ASCII and shows basic perf info, see gif below; app_perf_test - playground regarding vectorisation and cache perf, prints some iter timings using various approaches to data layout and computation methods), will be built alongside the library
 
 <div align="center">
 <img src="https://raw.githubusercontent.com/michal2229/gdrigsystem/refs/heads/main/res/test_app_tower_00.gif" width="574" />
@@ -37,9 +36,9 @@ Build steps for standalone rigsystem_lib usage:
 
 
 ### todo
-- [ ] refine the GDRigSystem api - more flexibility in terms of rig definition (functions callable from GDScript for managing nodes and connections instead of enumerating other node's children, function to import definition from YAML file, etc.)
+- [x] refine the GDRigSystem api - more flexibility in terms of rig definition (functions callable from GDScript for managing nodes and connections instead of enumerating other node's children, function to import definition from YAML file, etc.)
 - [ ] refine the rigsystem_lib api - cleaner use of resources, modular integrator for runtime switching, etc.
-- [ ] implement more integrators (implicit Euler, Runge–Kutta, etc.)
+- [ ] implement more integrators (implicit Euler, Runge–Kutta of various orders, etc.)
 - [x] set up a buildsystem and make scripts for building rigsystem_lib standalone 
 - [x] make a C++ app for more robust testing and profiling the rigsystem_lib without Godot
 - [ ] better interfacing with Godot physics system - more performance, better behavior, ability to deform a mesh, etc.
